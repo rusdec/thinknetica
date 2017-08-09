@@ -1,3 +1,6 @@
+puts "Расчёт идеального веса"
+puts
+
 modificator = 110
 
 print "Ваше имя: "
