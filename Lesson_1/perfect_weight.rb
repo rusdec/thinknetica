@@ -12,7 +12,7 @@ height = gets.chomp.to_f
 perfect_weight = height - modificator
 
 if perfect_weight > 0
-	puts "#{name}, ваш идеальный вес #{perfect_weight} кг."
+  puts "#{name}, ваш идеальный вес #{perfect_weight} кг."
 else
-	puts "Ваш вес уже оптимальный"
+  puts "Ваш вес уже оптимальный"
 end
