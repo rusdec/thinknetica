@@ -13,8 +13,8 @@ discriminant = b**2.0 - 4.0*a*c
 
 if discriminant > 0
   discriminant = Math.sqrt(discriminant)
-  first_root	= (-b + discriminant)/(2.0*a)
-  second_root	= (-b - discriminant)/(2.0*a)
+  first_root  = (-b + discriminant)/(2.0*a)
+  second_root = (-b - discriminant)/(2.0*a)
   puts "Значение первого корня #{first_root}"
   puts "Значение второго корня #{second_root}"
 
