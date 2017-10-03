@@ -18,4 +18,4 @@ months = {
   "Декабрь" => 31,
 }
 
-months.each { |month, day_count| puts month if day_count == 31 } 
+months.each { |month, days_count| puts month if days_count == 30 } 
