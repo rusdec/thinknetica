@@ -10,6 +10,6 @@ end
 
 fibonacci_numbers = []
 (1..100).each do |number|
-  fibonacci_numbers.push(fibonacci(number))
+  fibonacci_numbers << fibonacci(number)
   puts "#{number}: #{fibonacci_numbers[number-1]}"
 end

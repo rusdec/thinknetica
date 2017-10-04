@@ -19,31 +19,31 @@ loop do
   product = {}
 
   print "Название товара: "
-  product['name'] = gets.chomp
+  product[:name] = gets.chomp
 
-  break if product['name'] == "стоп"
+  break if product[:name] == "стоп"
   
   print "Стоимость товара (за шт.): "
-  product['cost'] = gets.chomp.to_f
+  product[:cost] = gets.chomp.to_f
   
   print "Количество товара (шт.): "
-  product['amount'] = gets.chomp.to_f
+  product[:amount] = gets.chomp.to_f
 
-  basket[product['name']] = {
-    "cost" => product['cost'],
-    "amount" => product['amount'],
+  basket[product[:name]] = {
+    cost: product[:cost],
+    amount: product[:amount],
   }
   
-  total_cost += product['cost']*product['amount']
+  total_cost += product[:cost]*product[:amount]
   puts    
 end
 
 #Вывод корзины
 basket.each do |name, properties| 
   puts "--| \"#{name}\" |--"
-  puts "Цена шт.: #{properties['cost']}"
-  puts "Кол-во: #{properties['amount']}"
-  puts "Итого: #{properties['cost']*properties['amount']}"
+  puts "Цена шт.: #{properties[:cost]}"
+  puts "Кол-во: #{properties[:amount]}"
+  puts "Итого: #{properties[:cost]*properties[:amount]}"
   puts
 end
 

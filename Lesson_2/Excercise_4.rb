@@ -13,7 +13,7 @@ english_alphabet = [
 ]
 
 #исключил 'y'
-english_vowels = ['a', 'e', 'i', 'o', 'u']
+english_vowels = %w(a e i o u)
 
 vowels_order = {}
 english_vowels.each do |vowel|
