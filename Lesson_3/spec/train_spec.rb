@@ -104,4 +104,11 @@ describe Train do
     end
   end
 
+  context "Перемещение со станции на станцию" do
+    it "Должен прибывать на станцию" do
+    end
+    it "Должен покидать на станцию" do
+    end
+  end
+
 end

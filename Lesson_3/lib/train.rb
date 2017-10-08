@@ -1,12 +1,13 @@
 class Train
   attr_reader :speed, :type, :number
+  @@types = [:passenger, :freight]
 
   def initialize number, type, wagons_count
     @number = number
-    @type = type
+    @type = type.to_sym
+    @speed = 0
     @wagons = []
     wagons_count.times { wagon_add }
-    @speed = 0
   end
 
   def speed_up n
@@ -33,6 +34,7 @@ class Train
     @wagons.length
   end
 
+  def self.types
+    @@types
+  end
 end
-
-train = Train.new('12345','passenger',5)
