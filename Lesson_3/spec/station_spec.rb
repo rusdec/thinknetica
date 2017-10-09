@@ -10,6 +10,7 @@
 
 require 'station'
 require 'train'
+require 'route'
 
 describe Station do
 
@@ -28,20 +29,20 @@ describe Station do
     end
   end
 
-  context "Доступные методы" do
-    it "возвращать список всех поездов на станции" do
+  context "Интерфейс" do
+    it "Может возвращать список всех поездов на станции" do
       expect(@station).to respond_to(:trains_count)
     end
-    it "возвращать список поездов на станции по типу" do
+    it "Может возвращать список поездов на станции по типу" do
       expect(@station).to respond_to(:trains_count_by_type)
     end
-    it "отправлять поезда" do
+    it "Может отправлять поезда" do
       expect(@station).to respond_to(:send_train)
     end
-    it "принимать поезда" do
+    it "Может принимать поезда" do
       expect(@station).to respond_to(:place_train)
     end
-    it "отдавать имя" do
+    it "Может отдавать имя" do
       expect(@station).to respond_to(:name)
     end
   end
@@ -67,7 +68,13 @@ describe Station do
         expect(@station.trains_count_by_type "freight").to eql(0)  
       end
     end
-    context "Отправка поезда" do
+    context "Отправка/прибытие поезда" do
+      before(:each) do
+        @station_first = Station.new("Москва")
+        @station_last = Station.new("Санкт-Петербург")
+        @route = Route.new(@station_first, @station_last)
+        @train.route=@route
+      end
       context "Прибытие поезда" do
         it "Может принять поезд" do
           trains_count_before = @station.trains_count
@@ -76,12 +83,21 @@ describe Station do
           expect(@station.trains_count).to eql(trains_count_before+1)
         end
       end
-      it "Должен отправить поезд по его номеру" do
-        number = "12345"
-        @station.place_train @train
-        trains_count_before = @station.trains_count
-        @station.send_train number
-        expect(@station.trains_count).to eql(trains_count_before-1)
+      context "Отправка поезда по его номеру" do
+        it "Должен удалить поезд поезд с этим номером" do
+          number = "12345"
+
+          @station.place_train @train
+          trains_count_before = @station.trains_count
+          @station.send_train number
+          expect(@station.trains_count).to eql(trains_count_before-1)
+        end
+        it "Поезд должен прибыть на следующую станцию" do
+          number = "12345"
+          @station.place_train @train
+          @station.send_train number
+          expect(@train.current_station).to eql(@station_last)
+        end
       end
       it "Если поезда с переданным номером нет, отправка не происходит" do
         number = "9283593275298785223"
