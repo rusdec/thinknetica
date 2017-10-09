@@ -54,12 +54,31 @@ describe Route do
         expect(station_list[1]).to eql(@station)
       end
       it "Может добавляться только объект класса Station" do
-        @route1 = Route.new(@station_first, @station_last)
-        station_list_before = @route1.stations
-        @route1.add_station "Станция_строка"
-        station_list_after = @route1.stations
-        expect(station_list_after.length).to eq(station_list_before.length)
+        @route = Route.new(@station_first, @station_last)
+        station_list_before = @route.stations.length
+        @route.add_station "Станция_строка"
+        expect(@route.stations.length).to eq(station_list_before)
       end
     end
+    
+    context "Удаление промежуточной станции" do
+      before(:each) do
+        @station = Station.new("Новгород")
+        @station2 = Station.new("Колпино")
+      end
+     
+      it "Станция может быть удалена" do
+        station_list_before = @route.stations.length
+        @route.add_station @station2
+        @route.delete_station
+        expect(@route.stations.length).to eql(station_list_before)
+      end 
+
+      it "Нельзя удалить первую и последнюю станции" do
+        @route.stations.length.times { @route.delete_station }
+        expect(@route.stations).to eql([@station_first, @station_last])
+      end
+    end
+
   end
 end
