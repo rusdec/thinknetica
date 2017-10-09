@@ -45,11 +45,16 @@ describe Route do
 
     context "Добавление промежуточной станции" do
       before(:each) do
+        @station_first = Station.new("Москва")
+        @station_last = Station.new("Санкт-Петербург")
+        @route = Route.new(@station_first, @station_last)
         @station = Station.new("Новгород")
       end
       it "Станция может добавляется только между начальной и конечной" do
         @route.add_station @station
+        puts @station_last
         station_list = @route.stations
+        puts station_list
         expect(station_list[1]).to eql(@station)
       end
       it "Может добавляться только объект класса Station" do

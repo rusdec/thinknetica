@@ -68,13 +68,13 @@ class Train
   private
  
   def move_to_station n
-    unless @route.stations[n].is_nil?
+    if @route.stations[n].is_a?(Station) && n >= 0
       @route.stations[n].place_train(self)
       @current_station_index = n
     end
   end
 
   def station n
-    @route.stations[n] if @route.is_a?(Route) && @route.stations[n].is_a?(Station) 
+    @route.stations[n] if @route.is_a?(Route) && @route.stations[n].is_a?(Station)
   end
 end

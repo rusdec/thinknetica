@@ -17,32 +17,40 @@ require 'route'
 require 'station'
 
 describe Train do
+
+  context "Создание" do
+    it "Доджен принимать два объекта типа номер (String), тип (String), кол-во вагонов (Integer)" do
+      allow(Train).to receive(:new).with(an_instance_of(String), an_instance_of(Station), an_instance_of(Integer))
+    end
+  end 
+
   before(:each) do
     @train = Train.new("12345", "passenger", 5)
   end
+
   context "Доступные методы" do
-    it "Должен возвращать текущую скорость (speed)" do
+    it "Может возвращать текущую скорость (speed)" do
       expect(@train).to respond_to(:speed)
     end
-    it "Должен возвращать тип (type)" do
+    it "Может возвращать тип (type)" do
       expect(@train).to respond_to(:type)
     end
-    it "Должен возвращать номер (number)" do
+    it "Может возвращать номер (number)" do
       expect(@train).to respond_to(:number)
     end
-    it "Должен возвращать кол-во вагонов (wagons_count)" do
+    it "Может возвращать кол-во вагонов (wagons_count)" do
       expect(@train).to respond_to(:wagons_count)
     end
-    it "Должен увеличивать скорость" do
+    it "Может увеличивать скорость" do
       expect(@train).to respond_to(:speed_up)
     end
-    it "Должен уменьшать скорость" do
+    it "Может уменьшать скорость" do
       expect(@train).to respond_to(:speed_down)
     end
-    it "Должен приплять вагоны" do
+    it "Может прицеплять вагоны" do
       expect(@train).to respond_to(:wagon_delete)
     end
-    it "Должен отцеплять вагоны" do
+    it "Может отцеплять вагоны" do
       expect(@train).to respond_to(:wagon_add)
     end
     it "Может принимать маршрут следования" do
@@ -140,13 +148,35 @@ describe Train do
       @train.route=route
       expect(@train.current_station).to eql(nil)
     end
+    it "При установке маршрута поезд отправляется на первую станцию" do
+      @train.route=@route
+      expect(@train.current_station).to eql(@station_first)
+    end
     it "Должен возвратить текущую станцию" do
-      
+      @train.route=@route
+      expect(@train.current_station).to eql(@station_first)
     end
-    it "Должен прибывать на станцию" do
+    it "Должен ехать на след. на станцию" do
+      @train.route=@route
+      @train.move_forward
+      expect(@train.current_station).to eql(@station_middle)
     end
-    it "Должен покидать на станцию" do
+    it "Должен ехать на пред. на станцию" do
+      @train.route=@route
+      @train.move_forward
+      @train.move_backward
+      expect(@train.current_station).to eql(@station_first)
     end
+    it "Не может выходить за первую станцию" do
+      @train.route=@route
+      @train.move_backward
+      expect(@train.current_station).to eql(@station_first)
+    end
+    it "Не может выходить за последнюю станцию" do
+      @train.route=@route
+      (@route.stations.length+1).times { @train.move_forward }
+      expect(@train.current_station).to eql(@station_last)
+    end 
   end
 
 end
