@@ -13,6 +13,8 @@
 =end
 
 require 'train'
+require 'route'
+require 'station'
 
 describe Train do
   before(:each) do
@@ -43,6 +45,24 @@ describe Train do
     it "Должен отцеплять вагоны" do
       expect(@train).to respond_to(:wagon_add)
     end
+    it "Может принимать маршрут следования" do
+      expect(@train).to respond_to(:route=)
+    end
+    it "Может перемещаться между станциями, указанными в маршруте вперёд" do
+      expect(@train).to respond_to(:move_forward)
+    end
+    it "Может перемещаться между станциями, указанными в маршруте назад" do
+      expect(@train).to respond_to(:move_backward)
+    end
+    it "Может возвращать предыдущую станцию" do
+      expect(@train).to respond_to(:previous_station)
+    end
+    it "Может возвращать текущую станцию" do
+      expect(@train).to respond_to(:current_station)
+    end
+    it "Может возвращать следующую станцию" do
+      expect(@train).to respond_to(:next_station)
+    end  
   end
 
   context "Обязательные параметры" do
@@ -104,7 +124,25 @@ describe Train do
     end
   end
 
-  context "Перемещение со станции на станцию" do
+  context "Маршрут следования" do
+    before(:each) do
+      @station_first = Station.new("Москва")
+      @station_last = Station.new("Санкт-петербург")
+      @station_middle = Station.new("Новгород")
+      @route = Route.new(@station_first, @station_last)
+      @route.add_station @station_middle
+    end
+    it "Может принимать маршрут следования" do
+      allow(@train).to receive(:add_station).with(an_instance_of(Route))
+    end
+    it "Маршурт следования должен иметь тип Route" do
+      route = "Новгород"
+      @train.route=route
+      expect(@train.current_station).to eql(nil)
+    end
+    it "Должен возвратить текущую станцию" do
+      
+    end
     it "Должен прибывать на станцию" do
     end
     it "Должен покидать на станцию" do
