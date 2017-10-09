@@ -46,7 +46,6 @@ describe Route do
     context "Добавление промежуточной станции" do
       before(:each) do
         @station = Station.new("Новгород")
-        @station2 = Station.new("Колпино")
       end
       it "Станция может добавляется только между начальной и конечной" do
         @route.add_station @station
@@ -64,12 +63,10 @@ describe Route do
     context "Удаление промежуточной станции" do
       before(:each) do
         @station = Station.new("Новгород")
-        @station2 = Station.new("Колпино")
       end
-     
       it "Станция может быть удалена" do
         station_list_before = @route.stations.length
-        @route.add_station @station2
+        @route.add_station @station
         @route.delete_station
         expect(@route.stations.length).to eql(station_list_before)
       end 
