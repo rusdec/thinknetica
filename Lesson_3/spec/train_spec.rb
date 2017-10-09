@@ -48,10 +48,10 @@ describe Train do
       expect(@train).to respond_to(:speed_down)
     end
     it "Может прицеплять вагоны" do
-      expect(@train).to respond_to(:wagon_delete)
+      expect(@train).to respond_to(:add_wagon)
     end
     it "Может отцеплять вагоны" do
-      expect(@train).to respond_to(:wagon_add)
+      expect(@train).to respond_to(:delete_wagon)
     end
     it "Может принимать маршрут следования" do
       expect(@train).to respond_to(:route=)
@@ -107,27 +107,27 @@ describe Train do
   context "Вагоны" do
     it "Должен прицеплять вагон" do
       wagons_count_before = @train.wagons_count
-      @train.wagon_add
+      @train.add_wagon
       expect(@train.wagons_count).to eql(wagons_count_before+1)
     end
     it "Может прицеплять вагон только если скорость = 0" do
       wagons_count_before = @train.wagons_count
       @train.speed_up 5
-      @train.wagon_add
+      @train.add_wagon
       expect(@train.wagons_count).to eql(wagons_count_before)
     end
 
     it "Должен отцеплять вагон" do
       wagons_count_before = @train.wagons_count
-      @train.wagon_add
-      @train.wagon_delete
+      @train.add_wagon
+      @train.delete_wagon
       expect(@train.wagons_count).to eql(wagons_count_before)
     end
     it "Может отцеплять вагон только если скорость = 0" do
-      @train.wagon_add
+      @train.add_wagon
       wagons_count_before = @train.wagons_count
       @train.speed_up 5
-      @train.wagon_delete
+      @train.delete_wagon
       expect(@train.wagons_count).to eql(wagons_count_before)
     end
   end

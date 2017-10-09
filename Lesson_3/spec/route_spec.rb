@@ -12,7 +12,7 @@ require 'station'
 describe Route do
 
   context "Создание" do
-    it "Доджен принимать два объекта типа Station" do
+    it "Должен принимать два объекта типа Station" do
       allow(Route).to receive(:new).with(an_instance_of(Station), an_instance_of(Station))
     end
   end 
@@ -52,9 +52,7 @@ describe Route do
       end
       it "Станция может добавляется только между начальной и конечной" do
         @route.add_station @station
-        puts @station_last
         station_list = @route.stations
-        puts station_list
         expect(station_list[1]).to eql(@station)
       end
       it "Может добавляться только объект класса Station" do

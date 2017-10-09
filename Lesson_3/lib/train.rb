@@ -4,10 +4,10 @@ class Train
 
   def initialize number, type, wagons_count
     @number = number
-    @type = type.to_sym
+    @type = @@types.include?(type.to_sym) ? type.to_sym : :passenger
     @speed = 0
     @wagons = []
-    wagons_count.times { wagon_add }
+    wagons_count.times { add_wagon }
   end
 
   def speed_up n
@@ -22,11 +22,11 @@ class Train
     @speed = 0
   end
   
-  def wagon_add 
+  def add_wagon
     @wagons << "wagon \##{wagons_count+1}" if @speed == 0
   end
   
-  def wagon_delete
+  def delete_wagon
     @wagons.pop if @speed == 0  
   end
 
