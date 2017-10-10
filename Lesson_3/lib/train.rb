@@ -2,7 +2,7 @@ class Train
   attr_reader :speed, :type, :number, :current_station_index, :route
   @@types = [:passenger, :freight]
 
-  def initialize number, type, wagons_count
+  def initialize(number, type, wagons_count)
     @number = number
     @type = @@types.include?(type.to_sym) ? type.to_sym : :passenger
     @speed = 0
@@ -10,11 +10,11 @@ class Train
     wagons_count.times { add_wagon }
   end
 
-  def speed_up n
+  def speed_up(n)
     @speed += n
   end
 
-  def speed_down n
+  def speed_down(n)
     @speed = (@speed - n >= 0) ? @speed - n : stop
   end
 
@@ -34,19 +34,12 @@ class Train
     @wagons.length
   end
 
-  def route= route
+  def route=(route)
     if route.is_a?(Route)
       @route = route
-      move_to_station 0
+      @current_station_index = 0
+      current_station.place_train(self)
     end
-  end
-  
-  def move_forward
-    move_to_station @current_station_index+1
-  end
-  
-  def move_backward
-    move_to_station @current_station_index-1
   end
 
   def current_station
@@ -61,20 +54,29 @@ class Train
     station @current_station_index+1
   end
 
+  def move_forward
+    if next_station != nil
+      current_station.send_train(self.number)
+      @current_station_index += 1
+      current_station.place_train(self)
+    end    
+  end
+  
+  def move_backward
+    if previous_station != nil
+      current_station.send_train(self.number) 
+      @current_station_index -= 1
+      current_station.place_train(self)
+    end 
+  end
+
   def self.types
     @@types
   end
 
-  private
- 
-  def move_to_station n
-    if @route.stations[n].is_a?(Station) && n >= 0
-      @route.stations[n].place_train(self)
-      @current_station_index = n
-    end
-  end
+  private 
 
-  def station n
-    @route.stations[n] if @route.is_a?(Route) && @route.stations[n].is_a?(Station)
+  def station(n)
+    (@route.is_a?(Route) && n >= 0 && n <= @route.stations.length) ? @route.stations[n] : nil
   end
 end

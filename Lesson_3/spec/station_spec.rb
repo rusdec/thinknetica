@@ -57,10 +57,13 @@ describe Station do
   context "Поезда" do
     before(:each) do
       @train = Train.new("12345", "passenger", 5)
+      @station_last = Station.new("Санкт-Петербург")
+      @route = Route.new(@station, @station_last)
+      @train.route=@route
     end
     context "Список всех поездов на станции" do
       it "Должен возвращать кол-во поездов на станции" do
-        expect(@station.trains_count).to eql(0)  
+        expect(@station.trains_count).to eql(1) #поезд устанавливается на 1-ую станцию
       end
       it "Должен возвращать кол-во поездов на станции по типу" do
         @station.place_train @train
@@ -95,8 +98,8 @@ describe Station do
         it "Поезд должен прибыть на следующую станцию" do
           number = "12345"
           @station.place_train @train
-          @station.send_train number
-          expect(@train.current_station).to eql(@station_last)
+          @train.move_forward
+          expect(@train.current_station.name).to eql(@station_last.name)
         end
       end
       it "Если поезда с переданным номером нет, отправка не происходит" do
