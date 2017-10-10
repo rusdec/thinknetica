@@ -17,7 +17,7 @@ class Station
   end
 
   def send_train number
-    if @trains[number.to_sym].is_a?(Train)
+    if @trains[number.to_sym].is_a?(Train) && @trains[number.to_sym].next_station != nil
       @trains[number.to_sym].move_forward
       @trains.delete(number.to_sym)
     end
