@@ -17,7 +17,7 @@ describe Route do
     end
   end 
 
-  context "Итнерфейс" do
+  context "Интерфейс" do
     it "Может добавлять промежуточную станцию" do
       expect(@route).to respond_to(:add_station)
     end
