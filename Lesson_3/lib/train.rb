@@ -55,19 +55,11 @@ class Train
   end
 
   def move_forward
-    if next_station 
-      current_station.send_train(self.number)
-      @current_station_index += 1
-      current_station.place_train(self)
-    end    
+    move(@current_station_index + 1) if next_station 
   end
   
   def move_backward
-    if previous_station
-      current_station.send_train(self.number) 
-      @current_station_index -= 1
-      current_station.place_train(self)
-    end 
+    move(@current_station_index - 1) if previous_station
   end
 
   def self.types
@@ -75,6 +67,12 @@ class Train
   end
 
   private 
+
+  def move(n)
+    current_station.send_train(self.number) 
+    @current_station_index = n
+    current_station.place_train(self)
+  end
 
   def station(n)
     (@route.is_a?(Route) && n >= 0 && n <= @route.stations.length) ? @route.stations[n] : nil
