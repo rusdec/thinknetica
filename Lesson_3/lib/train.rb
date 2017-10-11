@@ -55,7 +55,7 @@ class Train
   end
 
   def move_forward
-    if next_station != nil
+    if next_station 
       current_station.send_train(self.number)
       @current_station_index += 1
       current_station.place_train(self)
@@ -63,7 +63,7 @@ class Train
   end
   
   def move_backward
-    if previous_station != nil
+    if previous_station
       current_station.send_train(self.number) 
       @current_station_index -= 1
       current_station.place_train(self)
