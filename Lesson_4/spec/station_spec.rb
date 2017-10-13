@@ -56,7 +56,7 @@ describe Station do
  
   context "Поезда" do
     before(:each) do
-      @train = Train.new("12345", "passenger", 5)
+      @train = Train.new("12345")
       @station_last = Station.new("Санкт-Петербург")
       @route = Route.new(@station, @station_last)
       @train.route=@route
@@ -64,11 +64,6 @@ describe Station do
     context "Список всех поездов на станции" do
       it "Должен возвращать кол-во поездов на станции" do
         expect(@station.trains_count).to eql(1) #поезд устанавливается на 1-ую станцию
-      end
-      it "Должен возвращать кол-во поездов на станции по типу" do
-        @station.place_train @train
-        expect(@station.trains_count_by_type "passenger").to eql(1)  
-        expect(@station.trains_count_by_type "freight").to eql(0)  
       end
     end
     context "Отправка/прибытие поезда" do
@@ -81,7 +76,7 @@ describe Station do
       context "Прибытие поезда" do
         it "Может принять поезд" do
           trains_count_before = @station.trains_count
-          train2 = Train.new("РВ-387854-330А", "passenger", 4)
+          train2 = Train.new("РВ-387854-330А")
           @station.place_train train2
           expect(@station.trains_count).to eql(trains_count_before+1)
         end

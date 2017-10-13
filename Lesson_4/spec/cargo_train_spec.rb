@@ -1,5 +1,5 @@
 =begin
-Класс Train (Поезд):
+Класс CargoTrain (Поезд):
   Имеет номер (произвольная строка) и тип (грузовой, пассажирский) и количество вагонов, эти данные указываются при создании экземпляра класса
   Может набирать скорость
   Может возвращать текущую скорость
@@ -12,20 +12,22 @@
   Возвращать предыдущую станцию, текущую, следующую, на основе маршрута
 =end
 
-require 'train'
+require 'cargo_train'
 require 'route'
 require 'station'
+require 'cargo_wagon'
+require 'passenger_wagon'
 
-describe Train do
+describe CargoTrain do
 
   context "Создание" do
     it "Должен принимать номер (String)" do
-      allow(Train).to receive(:new).with(an_instance_of(String))
+      allow(CargoTrain).to receive(:new).with(an_instance_of(String))
     end
   end 
 
   before(:each) do
-    @train = Train.new("12345")
+    @train = CargoTrain.new("12345")
   end
 
   context "Доступные методы" do
@@ -100,28 +102,34 @@ describe Train do
 
   context "Вагоны" do
     before(:each) do
-      @wagon = Wagon.new
-    end
-    it "Должен прицеплять вагон" do
-      wagons_count_before = @train.wagons_count
-      @train.add_wagon @wagon
-      expect(@train.wagons_count).to eql(wagons_count_before+1)
+      @cargo_wagon = CargoWagon.new
+      @passenger_wagon = PassengerWagon.new
     end
     it "Может прицеплять вагон только если скорость = 0" do
       wagons_count_before = @train.wagons_count
       @train.speed_up 5
-      @train.add_wagon @wagon
+      @train.add_wagon @passenger_wagon
+      expect(@train.wagons_count).to eql(wagons_count_before)
+    end
+    it "Может прицеплять грузовые вагоны" do
+      wagons_count_before = @train.wagons_count
+      @train.add_wagon @cargo_wagon 
+      expect(@train.wagons_count).to eql(wagons_count_before+1)
+    end
+    it "Не может прицеплять пассажирски вагоны" do
+      wagons_count_before = @train.wagons_count
+      @train.add_wagon @passenger_wagon 
       expect(@train.wagons_count).to eql(wagons_count_before)
     end
 
     it "Должен отцеплять вагон" do
       wagons_count_before = @train.wagons_count
-      @train.add_wagon @wagon
+      @train.add_wagon @cargo_wagon
       @train.delete_wagon
       expect(@train.wagons_count).to eql(wagons_count_before)
     end
     it "Может отцеплять вагон только если скорость = 0" do
-      @train.add_wagon @wagon
+      @train.add_wagon @cargo_wagon
       wagons_count_before = @train.wagons_count
       @train.speed_up 5
       @train.delete_wagon
