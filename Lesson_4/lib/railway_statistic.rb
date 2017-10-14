@@ -65,28 +65,28 @@ class RailwayStatistic
         title: 'Поезда',
         data: [
           "Всего: #{data[:trains][:count_total]}",
+          "Грузовые: #{data[:trains][:cargo_trains]}",
+          "Пассажирские: #{data[:trains][:passenger_trains]}",
           "Имеют маршрут: #{data[:trains][:have_route]}",
           "Без маршрута: #{data[:trains][:have_not_route]}",
-          "Грузовые: #{data[:trains][:cargo_trains]}",
-          "Пассажирские: #{data[:trains][:passenger_trains]}"
         ]
       },
       {
         title: 'Станции',
         data: [
           "Всего: #{data[:stations][:count_total]}",
+          "Содержат поезда: #{data[:stations][:have_trains]}",
           "Без поездов: #{data[:stations][:empty]}",
-          "С поездами: #{data[:stations][:have_trains]}",
-          "Входят в маршрут: #{data[:stations][:used_in_routes]}",
-          "Не входят в маршрут: #{data[:stations][:unused_in_routes]}",
+          "Значатся в маршрутах: #{data[:stations][:used_in_routes]}",
+          "Не значатся в маршрутах: #{data[:stations][:unused_in_routes]}",
         ]
       },
       {
         title: 'Маршруты',
         data: [
           "Всего: #{data[:routes][:count_total]}",
-          "Назначенные: #{data[:routes][:used]}",
-          "Неназначенные: #{data[:routes][:unused]}",
+          "Используются: #{data[:routes][:used]}",
+          "Не используются: #{data[:routes][:unused]}",
         ]
       }
     ]
@@ -96,6 +96,7 @@ class RailwayStatistic
     end
   end
 
+  # извне могут быть доступны только методы 
   private
 
   attr_reader :trains, :routes, :stations, :data
@@ -105,10 +106,6 @@ class RailwayStatistic
     @data[:trains][:count_total] = trains_count_total
     @data[:trains][:have_not_route] = trains_have_not_route
     @data[:trains][:have_route] = trains_have_route
-  end
-
-  def trains_count_total
-    trains.length
   end
 
   def trains_have_not_route
@@ -129,9 +126,6 @@ class RailwayStatistic
   #/Поезда
 
   #Станции
-  def stations_statistic
-  end
-
   def stations_count_total
     stations.length
   end
@@ -169,10 +163,6 @@ class RailwayStatistic
 
 
   #Маршруты
-  def routes_statistic
-    
-  end
-
   def routes_used
     used_routes = []
     routes.each do |route|

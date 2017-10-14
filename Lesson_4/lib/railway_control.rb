@@ -45,20 +45,16 @@ class RailwayControl
 
     type_index = gets_train_type_index
     clear_screen
-    return if Train::TYPES[type_index].nil?
+    return if type_index.nil? || Train::TYPES[type_index].nil?
 
     number = gets_train_number
     clear_screen
     return if number.empty?
 
     case Train::TYPES[type_index][:type]
-      when 'CargoTrain'
-        train = CargoTrain.new(number)
-      when 'PassengerTrain'
-        train = PassengerTrain.new(number)
-      else
-        puts "неизвестный тип поезда"
-        return nil
+      when 'CargoTrain' then train = CargoTrain.new(number)
+      when 'PassengerTrain' then train = PassengerTrain.new(number)
+      else return 
     end
     
     @trains << train
@@ -68,15 +64,14 @@ class RailwayControl
     return if self.stations.length < 2
     
     self.print_stations
-    print "Введите индекс начальной станции: "
-    first_station_index = gets.chomp.to_i
-    print "Введите индекс конечной станции: "
-    last_station_index = gets.chomp.to_i
-    
+    first_station_index = gets_first_station_index
+    last_station_index = gets_last_station_index
     clear_screen
-    unless self.stations[first_station_index].nil? && self.stations[last_station_index].nil?
-      @routes << Route.new(self.stations[first_station_index], self.stations[last_station_index])
-    end
+    
+    return if first_station_index.nil? || self.stations[first_station_index].nil?
+    return if last_station_index.nil? || self.stations[last_station_index].nil?
+
+    @routes << Route.new(self.stations[first_station_index], self.stations[last_station_index])
   end
 
   def add_station_to_route
@@ -85,14 +80,14 @@ class RailwayControl
     self.print_stations
     station_index = gets_station_index
     clear_screen
+    return if station_index.nil? || self.stations[station_index].nil?
 
     self.print_routes
     route_index = gets_route_index
     clear_screen
+    return if route_index.nil? || self.routes[route_index].nil?
 
-    unless self.routes[route_index].nil? && stations[station_index].nil?
-      self.routes[route_index].add_station(stations[station_index])
-    end
+    self.routes[route_index].add_station(stations[station_index])
   end
 
   def delete_station_from_route
@@ -101,8 +96,9 @@ class RailwayControl
     self.print_routes
     route_index = gets_route_index
     clear_screen
+    return if route_index.nil? || self.routes[route_index].nil?
 
-    self.routes[route_index].delete_station unless self.routes[route_index].nil?
+    self.routes[route_index].delete_station
   end
 
   def add_route_to_train
@@ -111,14 +107,14 @@ class RailwayControl
     self.print_routes
     route_index = gets_route_index
     clear_screen
+    return if route_index.nil? || self.routes[route_index].nil?
 
     self.print_all_trains
     train_index = gets_train_index
     clear_screen
-
-    unless self.trains[train_index].nil? && self.routes[route_index].nil? 
-      self.trains[train_index].route=(self.routes[route_index])    
-    end
+    return if train_index.nil? || self.trains[train_index].nil?
+    
+    self.trains[train_index].route=(self.routes[route_index])    
   end
 
   def add_wagon_to_train
@@ -128,16 +124,15 @@ class RailwayControl
     train_index = gets_train_index
     clear_screen
 
-    unless self.trains[train_index].nil?
-      case self.trains[train_index].class.to_s
-        when 'CargoTrain'
-          wagon = CargoWagon.new
-        when 'PassengerTrain'
-          wagon = PassengerWagon.new
-      end
+    return if self.trains[train_index].nil?
 
-      self.trains[train_index].add_wagon wagon
+    case self.trains[train_index].class.to_s
+      when 'CargoTrain' then wagon = CargoWagon.new
+      when 'PassengerTrain' then wagon = PassengerWagon.new
+      else return
     end
+
+    self.trains[train_index].add_wagon wagon
   end
 
   def delete_wagon_from_train
@@ -146,8 +141,9 @@ class RailwayControl
     self.print_all_trains
     train_index = gets_train_index
     clear_screen
-
-    self.trains[train_index].delete_wagon unless self.trains[train_index].nil?
+    return if train_index.nil? || self.trains[train_index].nil?
+    
+    self.trains[train_index].delete_wagon
   end
 
   def move_train_forward
@@ -156,10 +152,11 @@ class RailwayControl
     self.print_all_trains
     train_index = gets_train_index
     clear_screen
+    return if train_index.nil? || self.trains[train_index].nil?
 
-    unless self.trains[train_index].route.nil? || self.trains[train_index].nil?
-      self.trains[train_index].move_forward
-    end
+    return if self.trains[train_index].route.nil?
+
+    self.trains[train_index].move_forward
   end
 
   def move_train_backward
@@ -168,10 +165,11 @@ class RailwayControl
     self.print_all_trains
     train_index = gets_train_index
     clear_screen
+    return if train_index.nil? || self.trains[train_index].nil?
 
-    unless self.trains[train_index].route.nil? || self.trains[train_index].nil?
-      self.trains[train_index].move_backward
-    end
+    return if self.trains[train_index].route.nil?
+
+    self.trains[train_index].move_backward
   end
 
   def print_trains_on_station
@@ -180,19 +178,17 @@ class RailwayControl
     self.print_stations
     station_index = gets_station_index
     clear_screen
+    return if station_index.nil? || self.stations[station_index].nil?
 
-    unless self.stations[station_index].nil?
-      trains = [] 
-      self.stations[station_index].trains.each { |number, train| trains << train }
-      print_trains(trains)
-    end
+    trains = [] 
+    self.stations[station_index].trains.each { |number, train| trains << train }
+    print_trains(trains)
+
     print_separator
   end
   
   def print_stations
-    self.stations.each_with_index do |station, index|
-      puts "[#{index}] #{station.name}"
-    end 
+    self.stations.each_with_index { |station, index| puts "[#{index}] #{station.name}" }
     print_separator
   end
 
@@ -222,8 +218,7 @@ class RailwayControl
   def print_extended_statistic
     self.statistic.calculate_extended_statistic(current_state_data)
     self.statistic.print_extended_statistic
-    puts
-    puts "Для продолжения нажмите Enter..."
+    print "Для продолжения нажмите Enter..."
     gets
     clear_screen
   end
@@ -240,38 +235,53 @@ class RailwayControl
 
   def gets_train_type_index
     print "Введите индекс типа поезда: "
-    gets.chomp.to_i
+    gets_integer
+  end
+
+  def gets_first_station_index
+    print "Введите индекс начальной станции: "
+    gets_integer
+  end
+  
+  def gets_last_station_index
+    print "Введите индекс конечной станции: "
+    gets_integer
   end
 
   def gets_station_name
     print "Введите название станции: "
-    station_name = gets.chomp.lstrip
+    gets.chomp.lstrip.rstrip
   end
 
   def gets_station_index
     print "Введите индекс станции: "
-    station_index = gets.chomp.to_i
+    gets_integer
   end
 
   def gets_train_number
     print "Задайте номер поезда: "
-    gets.chomp.lstrip
+    gets.chomp.lstrip.rstrip
   end
 
   def gets_train_index
     print "Введите индекс поезда: "
-    train_index = gets.chomp.to_i
+    gets_integer
   end
 
   def gets_route_index
     print "Введите индекс маршрута: "
-    route_index = gets.chomp.to_i
+    gets_integer
+  end
+
+  def gets_integer
+    input = gets.chomp.lstrip.rstrip
+    return (input.empty? || /\D/.match(input)) ? nil : input.to_i
   end
 
   def print_trains(trains)
     trains.each_with_index do |train, index|
       train_type = train.class.to_s
-      type = Train::TYPES.select { |train| train[:type] == train_type; }
+      type = Train::TYPES.select { |train| train[:type] == train_type }
       printable_data = [
         "[#{index}] Поезд №#{train.number}",
         "Тип: #{type[0][:name]}",
