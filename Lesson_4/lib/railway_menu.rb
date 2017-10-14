@@ -2,7 +2,7 @@ require_relative 'train'
 
 class RailwayMenu
 
-  attr_reader :action_menu
+  attr_reader :action_menu, :exit_index
   
   def initialize
     @action_menu = [
@@ -95,16 +95,25 @@ class RailwayMenu
         title: 'Выход',
       },
     ]
+    @exit_index = nil
   end
 
   def print_menu
     puts "Выберите действие:"
     self.action_menu.each_with_index do |item, index|
       case item[:type]
-        when :separator then puts
-        else puts "[#{index}] #{item[:title]}"
+        when :separator
+          puts
+        when :exit
+          @exit_index = index
+          self.print_menu_item(index,item)
+        else self.print_menu_item(index,item)
       end
     end
+  end
+
+  def print_menu_item(index, item)
+    puts "[#{index}] #{item[:title]}"
   end
 
   def title(index)
@@ -113,10 +122,6 @@ class RailwayMenu
 
   def message(index)
     self.action_menu[index][:message]
-  end
-
-  def clear_screen
-    print "\e[2J\e[f"
   end
 
 end

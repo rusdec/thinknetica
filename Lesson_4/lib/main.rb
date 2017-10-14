@@ -15,7 +15,7 @@ loop do
   next if action_index.empty?
 
   action_index = action_index.to_i
-  break if action_index == menu.action_menu.length-1
+  break if action_index == menu.exit_index
 
   railway_controller.send menu.message(action_index) unless menu.action_menu[action_index].nil?
 end
