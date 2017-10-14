@@ -19,14 +19,17 @@ require_relative 'passenger_wagon'
 require_relative 'station'
 require_relative 'route'
 
+require_relative 'railway_statistic'
+
 class RailwayControl
 
-  attr_reader :stations, :routes, :trains
+  attr_reader :stations, :routes, :trains, :statistic
   
   def initialize
     @stations = []
     @routes = []
     @trains = []
+    @statistic = RailwayStatistic.new
   end
 
   def create_station
@@ -39,25 +42,26 @@ class RailwayControl
     Train::TYPES.each_with_index do |train_type, index|
       puts "[#{index}] #{train_type[:name]}"
     end
+
     type_index = gets_train_type_index
     clear_screen
+    return if Train::TYPES[type_index].nil?
 
-    unless Train::TYPES[type_index].nil?
-      number = gets_train_number
-      clear_screen
+    number = gets_train_number
+    clear_screen
+    return if number.empty?
 
-      case Train::TYPES[type_index][:type]
-        when 'CargoTrain'
-          train = CargoTrain.new(number)
-        when 'PassengerTrain'
-          train = PassengerTrain.new(number)
-        else
-          puts "неизвестный тип поезда"
-          return nil
-      end
-
-      @trains << train
+    case Train::TYPES[type_index][:type]
+      when 'CargoTrain'
+        train = CargoTrain.new(number)
+      when 'PassengerTrain'
+        train = PassengerTrain.new(number)
+      else
+        puts "неизвестный тип поезда"
+        return nil
     end
+    
+    @trains << train
   end
 
   def create_route
@@ -210,7 +214,29 @@ class RailwayControl
     print "\e[2J\e[f"
   end
 
+  def print_short_statistic
+    self.statistic.calculate_short_statistic(current_state_data)
+    self.statistic.print_short_statistic
+  end
+
+  def print_extended_statistic
+    self.statistic.calculate_extended_statistic(current_state_data)
+    self.statistic.print_extended_statistic
+    puts
+    puts "Для продолжения нажмите Enter..."
+    gets
+    clear_screen
+  end
+
   private
+
+  def current_state_data
+    {
+      trains: self.trains,
+      routes: self.routes,
+      stations: self.stations
+    } 
+  end
 
   def gets_train_type_index
     print "Введите индекс типа поезда: "
