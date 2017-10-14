@@ -198,9 +198,9 @@ class RailwayControl
 
   def print_routes
     self.routes.each_with_index do |route, index|
-      print "[#{index}] ["
-      route.stations.each { |station| print " \"#{station.name}\" " }
-      puts "]"
+      stations = []
+      route.stations.each { |station| stations << station.name }
+      puts "[#{index}] #{stations.join(" -> ")}"
     end  
     print_separator
   end
@@ -272,11 +272,13 @@ class RailwayControl
     trains.each_with_index do |train, index|
       train_type = train.class.to_s
       type = Train::TYPES.select { |train| train[:type] == train_type; }
-      print "[#{index}] Поезд №#{train.number} | "
-      print "Тип: #{type[0][:name]} | "
-      print "Вагонов: #{train.wagons_count} | "
-      print "Текущая станция: #{train.current_station.name}" unless train.route.nil?
-      puts
+      printable_data = [
+        "[#{index}] Поезд №#{train.number}",
+        "Тип: #{type[0][:name]}",
+        "Вагонов: #{train.wagons_count}",
+      ]
+      printable_data << "Текущая станция: #{train.current_station.name}" unless train.route.nil?
+      puts printable_data.join(" | ")
     end
   end
 

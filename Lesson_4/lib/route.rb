@@ -7,9 +7,8 @@ class Route
   end
 
   def add_station(station)
-    double_station = self.stations.select { |station_in_route| station_in_route == station }
-    puts double_station;
-    @stations.insert(-2, station) if station.is_a?(Station) && double_station.nil?
+    
+    @stations.insert(-2, station) if station.is_a?(Station) && !stations.include?(station)
   end
   
   def delete_station
