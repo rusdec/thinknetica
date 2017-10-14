@@ -1,10 +1,23 @@
 class Train
-  attr_reader :speed, :type, :number, :current_station_index, :route
+  TYPES = [
+    {
+      type: 'CargoTrain',
+      name: 'грузовой'
+    },
+    {
+      type: 'PassengerTrain',
+      name: 'пассажирский'
+    }
+  ]
+
+  attr_reader :speed, :number, :current_station_index, :route
 
   def initialize(number)
     @number = number
     @speed = 0
     @wagons = []
+    @route = nil
+    @current_station_index = nil
   end
 
   def speed_up(n)
@@ -40,15 +53,15 @@ class Train
   end
 
   def current_station
-    station self.current_station_index
+    station(self.current_station_index)
   end
 
   def previous_station
-    station self.current_station_index-1 
+    station(self.current_station_index-1)
   end
 
   def next_station
-    station self.current_station_index+1
+    station(self.current_station_index+1)
   end
 
   def move_forward
@@ -58,7 +71,10 @@ class Train
   def move_backward
     move(self.current_station_index - 1) if previous_station
   end
-
+  
+  # protected здесь для того, чтобы:
+  # - скрыть методы от доступа извне
+  # - показать, что методы будут использоваться в классах-потомках.
   protected 
 
   def move(n)

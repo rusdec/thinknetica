@@ -15,6 +15,7 @@
 require 'train'
 require 'route'
 require 'station'
+require 'wagon'
 
 describe Train do
 
