@@ -126,10 +126,6 @@ class RailwayStatistic
   #/Поезда
 
   #Станции
-  def stations_count_total
-    stations.length
-  end
-
   def stations_empty
     stations.select { |station| station.trains.empty? }
   end
