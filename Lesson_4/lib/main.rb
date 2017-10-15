@@ -17,5 +17,7 @@ loop do
   action_index = action_index.to_i
   break if action_index == menu.exit_index
 
-  railway_controller.send menu.message(action_index) unless menu.action_menu[action_index].nil?
+  next if menu.message(action_index).nil? || menu.action_menu[action_index].nil?
+
+  railway_controller.public_send menu.message(action_index)
 end

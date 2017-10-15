@@ -75,7 +75,7 @@ class RailwayControl
   end
 
   def add_station_to_route
-    return if self.routes.empty? || self.stations.empty?
+    return if self.routes.empty?
 
     self.print_stations
     station_index = gets_station_index
@@ -91,7 +91,7 @@ class RailwayControl
   end
 
   def delete_station_from_route
-    return if self.routes.empty? || self.stations.empty?
+    return if self.routes.empty?
 
     self.print_routes
     route_index = gets_route_index
@@ -147,7 +147,7 @@ class RailwayControl
   end
 
   def move_train_forward
-    return if self.trains.empty? || self.stations.empty? || self.routes.empty?
+    return if self.trains.empty? || self.routes.empty?
 
     self.print_all_trains
     train_index = gets_train_index
@@ -160,7 +160,7 @@ class RailwayControl
   end
 
   def move_train_backward
-    return if self.trains.empty? || self.stations.empty? || self.routes.empty?
+    return if self.trains.empty? || self.routes.empty?
 
     self.print_all_trains
     train_index = gets_train_index
