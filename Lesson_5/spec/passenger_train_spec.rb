@@ -20,6 +20,15 @@ require 'cargo_wagon'
 
 describe PassengerTrain do
 
+  context "Методы класса" do
+    context ".find" do
+      it "Должен возвратить объект поезда по его номеру" do
+        train = PassengerTrain.new("12345")
+        expect(PassengerTrain.find("12345")).to eql(train)
+      end
+    end
+  end
+
   context "Создание" do
     it "Должен принимать два объекта типа номер (String)" do
       allow(PassengerTrain).to receive(:new).with(an_instance_of(String))

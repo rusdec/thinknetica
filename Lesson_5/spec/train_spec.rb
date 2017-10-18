@@ -19,6 +19,15 @@ require 'wagon'
 
 describe Train do
 
+  context "Методы класса" do
+    context ".find" do
+      it "Должен возвратить объект поезда по его номеру" do
+        train = Train.new("12345")
+        expect(Train.find("12345")).to eql(train)
+      end
+    end
+  end
+
   context "Создание" do
     it "Должен принимать номер (String)" do
       allow(Train).to receive(:new).with(an_instance_of(String))
@@ -175,6 +184,16 @@ describe Train do
       (@route.stations.length+1).times { @train.move_forward }
       expect(@train.current_station).to eql(@station_last)
     end 
+  end
+
+  context "Модульный интерфейс" do
+    context "Модуль Manufactura" do
+      let(:company_name) { "TrainManufactura" }
+      it "Устанавливает возвращает название производителя" do
+        @train.company_name=(:company_name)
+        expect(@train.company_name).to eql(:company_name)
+      end
+    end
   end
 
 end

@@ -1,14 +1,21 @@
+require_relative 'manufactura'
+
 class Train
+
+  include Manufactura
+
   TYPES = [
     {
       type: 'CargoTrain',
-      name: 'грузовой'
+      name: 'Грузовой'
     },
     {
       type: 'PassengerTrain',
-      name: 'пассажирский'
+      name: 'Пассажирский'
     }
   ]
+
+  @@trains = {}
 
   attr_reader :speed, :number, :current_station_index, :route
 
@@ -18,6 +25,11 @@ class Train
     @wagons = []
     @route = nil
     @current_station_index = nil
+    @@trains[number] = self
+  end
+  
+  def self.find(train_number)
+    @@trains[train_number]
   end
 
   def speed_up(n)

@@ -1,9 +1,18 @@
 class Station
+  
   attr_reader :name, :trains
+
+  @@station_count = 0
+
+  def self.all
+    @@station_count
+  end
 
   def initialize(name)
     @name = name
     @trains = {}
+    
+    @@station_count += 1
   end
 
   def trains_count
@@ -25,3 +34,5 @@ class Station
   end
 
 end
+
+puts Station.all

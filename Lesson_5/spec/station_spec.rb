@@ -20,6 +20,14 @@ describe Station do
     @station = Station.new(station_name)
   end
 
+  context "Методы класса" do
+    context ".all" do
+      it "Должен вернуть кол-во созданных объектов" do
+        expect(Station.all).to eql(1)
+      end
+    end
+  end
+
   context "Создание" do
     it "Должен принимать название (name)" do
       allow(Station).to receive(:new).with(an_instance_of(String))

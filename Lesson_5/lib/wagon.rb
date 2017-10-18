@@ -1,4 +1,9 @@
+require_relative 'manufactura'
+
 class Wagon
+
+  include Manufactura
+
   attr_reader :number
 
   def initialize
