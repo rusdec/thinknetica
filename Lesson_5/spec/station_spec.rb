@@ -23,7 +23,7 @@ describe Station do
   context "Методы класса" do
     context ".all" do
       it "Должен вернуть кол-во созданных объектов" do
-        expect(Station.all).to eql(1)
+        expect(Station.all).to eql([@station])
       end
     end
   end
