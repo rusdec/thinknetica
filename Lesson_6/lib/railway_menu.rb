@@ -12,7 +12,7 @@ class RailwayMenu
         type:     :message,
       },
       {
-        message:  :print_stations,
+        message:  :print_stations_only,
         title:    'Вывести список станций',
         type:     :message,
       },
@@ -30,7 +30,7 @@ class RailwayMenu
         type:     :message,
       },
       {
-        message:  :print_routes,
+        message:  :print_routes_only,
         title:    'Вывести список маршрутов',
         type:     :message,
       },
@@ -53,7 +53,7 @@ class RailwayMenu
         type:     :message,
       },
       {
-        message:  :print_all_trains,
+        message:  :print_all_trains_only,
         title:    'Вывести список поездов',
         type:     :message,
       },
@@ -74,7 +74,7 @@ class RailwayMenu
       },
       {
         message:  :move_train_forward,
-        title:    'Переместить поезд по маршруту вперед',
+        title:    'Переместить поезд по маршруту вперёд',
         type:     :message,
       },
       {

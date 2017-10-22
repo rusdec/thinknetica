@@ -19,5 +19,13 @@ loop do
 
   next if menu.message(action_index).nil? || menu.action_menu[action_index].nil?
 
-  railway_controller.public_send menu.message(action_index)
+  begin
+    result = railway_controller.public_send menu.message(action_index)
+  rescue StandardError => error
+    railway_controller.clear_screen
+    puts "Ошибка: #{error}"
+  else
+    railway_controller.clear_screen
+    puts result
+  end
 end

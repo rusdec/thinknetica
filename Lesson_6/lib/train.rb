@@ -17,6 +17,8 @@ class Train
 
   @@trains = {}
 
+  RGXP_TRAIN_NUMBER_FORMAT = /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i
+
   attr_reader :speed, :number, :current_station_index, :route
 
   def initialize(number)
@@ -26,8 +28,18 @@ class Train
     @route = nil
     @current_station_index = nil
     @@trains[number] = self
+    validate!
   end
-  
+ 
+  def validate!
+    raise StandardError, "Неправильный формат номера (#{self.number})" if self.number !~ RGXP_TRAIN_NUMBER_FORMAT
+    true
+  end
+
+  def valid?
+    self.validate!
+  end 
+
   def self.find(train_number)
     @@trains[train_number]
   end
@@ -45,11 +57,16 @@ class Train
   end
   
   def add_wagon wagon
-    @wagons << wagon if self.speed == 0
+    raise StandardError, "Нельзя прицепить: поезд движется" if self.speed > 0
+    
+    @wagons << wagon  
   end
   
   def delete_wagon
-    @wagons.pop if self.speed == 0  
+    raise StandardError, "У поезда нет прицепленных вагонов" if wagons_count == 0
+    raise StandardError, "Нельзя отцепить: поезд движется" if self.speed > 0
+
+    @wagons.pop
   end
 
   def wagons_count
@@ -57,11 +74,11 @@ class Train
   end
 
   def route=(route)
-    if route.is_a?(Route)
-      @route = route
-      @current_station_index = 0
-      current_station.place_train(self)
-    end
+    raise StandardError, "В качестве маршрута можно назначить только маршрут" unless route.is_a?(Route)
+      
+    @route = route
+    @current_station_index = 0
+    self.current_station.place_train(self)
   end
 
   def current_station
@@ -77,16 +94,17 @@ class Train
   end
 
   def move_forward
-    move(self.current_station_index + 1) if next_station 
+    raise StandardError, "Это конечная станция" unless next_station
+
+    move(self.current_station_index + 1)
   end
   
   def move_backward
-    move(self.current_station_index - 1) if previous_station
+    raise StandardError, "Это начальная станция" unless previous_station
+
+    move(self.current_station_index - 1)
   end
   
-  # protected здесь для того, чтобы:
-  # - скрыть методы от доступа извне
-  # - показать, что методы будут использоваться в классах-потомках.
   protected 
 
   def move(n)
@@ -96,6 +114,6 @@ class Train
   end
 
   def station(n)
-    (self.route.is_a?(Route) && n >= 0 && n <= self.route.stations.length) ? self.route.stations[n] : nil
+    (n >= 0 && n < self.route.stations.length) ? self.route.stations[n] : nil
   end
 end

@@ -34,44 +34,46 @@ class RailwayControl
 
   def create_station
     station_name = gets_station_name
-    @stations << Station.new(station_name) unless station_name.empty?
-    clear_screen
+    station = Station.new(station_name)
+
+    @stations << station
+    "Станция '#{station_name}' создана"
   end
 
   def create_train
     Train::TYPES.each_with_index do |train_type, index|
       puts "[#{index}] #{train_type[:name]}"
     end
-
     type_index = gets_train_type_index
-    clear_screen
-    return if type_index.nil? || Train::TYPES[type_index].nil?
+    validate!(type_index, Train::TYPES)
 
     number = gets_train_number
-    clear_screen
-    return if number.empty?
-
     case Train::TYPES[type_index][:type]
       when 'CargoTrain' then train = CargoTrain.new(number)
       when 'PassengerTrain' then train = PassengerTrain.new(number)
-      else return 
     end
-    
-    @trains << train
+    rescue StandardError => error
+      clear_screen
+      puts error 
+      retry
+    else
+      @trains << train
+      "Поезд '№#{number}' тип '#{Train::TYPES[type_index][:name]}' создан"
   end
 
   def create_route
     return if self.stations.length < 2
     
     self.print_stations
-    first_station_index = gets_first_station_index
-    last_station_index = gets_last_station_index
-    clear_screen
-    
-    return if first_station_index.nil? || self.stations[first_station_index].nil?
-    return if last_station_index.nil? || self.stations[last_station_index].nil?
 
-    @routes << Route.new(self.stations[first_station_index], self.stations[last_station_index])
+    first_station_index = gets_first_station_index
+    validate!(first_station_index, self.stations)
+
+    last_station_index = gets_last_station_index
+    validate!(last_station_index, self.stations)
+      
+    self.routes << Route.new(self.stations[first_station_index], self.stations[last_station_index])
+    "Маршрут '#{self.stations[first_station_index].name} -> #{self.stations[last_station_index].name}' создан"
   end
 
   def add_station_to_route
@@ -79,15 +81,15 @@ class RailwayControl
 
     self.print_stations
     station_index = gets_station_index
-    clear_screen
-    return if station_index.nil? || self.stations[station_index].nil?
 
     self.print_routes
     route_index = gets_route_index
-    clear_screen
-    return if route_index.nil? || self.routes[route_index].nil?
+
+    validate!(station_index, self.stations)
+    validate!(route_index, self.routes)
 
     self.routes[route_index].add_station(stations[station_index])
+    "Станция '#{stations[station_index].name}' добавлена в маршрут"
   end
 
   def delete_station_from_route
@@ -95,10 +97,11 @@ class RailwayControl
 
     self.print_routes
     route_index = gets_route_index
-    clear_screen
-    return if route_index.nil? || self.routes[route_index].nil?
+    validate!(route_index, self.routes)
 
+    station_name = self.routes[route_index].stations[-2].name
     self.routes[route_index].delete_station
+    "Станция '#{station_name}' удалена из маршрута"
   end
 
   def add_route_to_train
@@ -106,15 +109,15 @@ class RailwayControl
 
     self.print_routes
     route_index = gets_route_index
-    clear_screen
-    return if route_index.nil? || self.routes[route_index].nil?
 
     self.print_all_trains
     train_index = gets_train_index
-    clear_screen
-    return if train_index.nil? || self.trains[train_index].nil?
+
+    validate!(route_index, self.routes)
+    validate!(train_index, self.trains)
     
     self.trains[train_index].route=(self.routes[route_index])    
+    "Маршрут добавлен к поезду №#{self.trains[train_index].number}"
   end
 
   def add_wagon_to_train
@@ -122,17 +125,15 @@ class RailwayControl
 
     self.print_all_trains
     train_index = gets_train_index
-    clear_screen
-
-    return if self.trains[train_index].nil?
+    validate!(train_index, self.trains)
 
     case self.trains[train_index].class.to_s
       when 'CargoTrain' then wagon = CargoWagon.new
       when 'PassengerTrain' then wagon = PassengerWagon.new
-      else return
     end
 
     self.trains[train_index].add_wagon wagon
+    "Вагон добавлен к поезду №#{self.trains[train_index].number}"
   end
 
   def delete_wagon_from_train
@@ -140,10 +141,10 @@ class RailwayControl
 
     self.print_all_trains
     train_index = gets_train_index
-    clear_screen
-    return if train_index.nil? || self.trains[train_index].nil?
+    validate!(train_index, self.trains)
     
     self.trains[train_index].delete_wagon
+    "Вагон отцеплен от поезда №#{self.trains[train_index].number}"
   end
 
   def move_train_forward
@@ -151,12 +152,14 @@ class RailwayControl
 
     self.print_all_trains
     train_index = gets_train_index
-    clear_screen
-    return if train_index.nil? || self.trains[train_index].nil?
+    validate!(train_index, self.trains)
 
-    return if self.trains[train_index].route.nil?
-
-    self.trains[train_index].move_forward
+    if self.trains[train_index].route.nil?
+      "У поезда №#{self.trains[train_index].number} нет маршрута"
+    else
+      self.trains[train_index].move_forward
+      "Поезд №#{self.trains[train_index].number} прибыл на станцию '#{self.trains[train_index].current_station.name}'"
+    end
   end
 
   def move_train_backward
@@ -164,32 +167,46 @@ class RailwayControl
 
     self.print_all_trains
     train_index = gets_train_index
-    clear_screen
-    return if train_index.nil? || self.trains[train_index].nil?
+    validate!(train_index, self.trains)
 
-    return if self.trains[train_index].route.nil?
-
-    self.trains[train_index].move_backward
+    if self.trains[train_index].route.nil?
+      "У поезда №#{self.trains[train_index].number} нет маршрута"
+    else
+      self.trains[train_index].move_backward
+      "Поезд №#{self.trains[train_index].number} прибыл на станцию '#{self.trains[train_index].current    _station.name}'"
+    end
   end
 
   def print_trains_on_station
     return if self.trains.empty? || self.stations.empty?
 
+    self.clear_screen
+
     self.print_stations
     station_index = gets_station_index
-    clear_screen
-    return if station_index.nil? || self.stations[station_index].nil?
+    validate!(station_index, self.stations)
 
     trains = [] 
     self.stations[station_index].trains.each { |number, train| trains << train }
     print_trains(trains)
 
-    print_separator
+    push_enter_for_continue
   end
-  
+ 
+  def print_stations_only
+    self.clear_screen
+    print_stations
+    push_enter_for_continue
+  end
+ 
   def print_stations
     self.stations.each_with_index { |station, index| puts "[#{index}] #{station.name}" }
-    print_separator
+  end
+
+  def print_routes_only
+    self.clear_screen
+    print_routes
+    push_enter_for_continue
   end
 
   def print_routes
@@ -198,12 +215,20 @@ class RailwayControl
       route.stations.each { |station| stations << station.name }
       puts "[#{index}] #{stations.join(" -> ")}"
     end  
-    print_separator
+  end
+
+  def validate!(index, object)
+    raise "Индекс не существует (#{index})" if !index.is_a?(Integer) || object[index].nil?
+  end
+
+  def print_all_trains_only
+    self.clear_screen
+    print_all_trains
+    push_enter_for_continue
   end
 
   def print_all_trains
     print_trains(self.trains)
-    print_separator
   end
 
   def clear_screen
@@ -218,12 +243,14 @@ class RailwayControl
   def print_extended_statistic
     self.statistic.calculate_extended_statistic(current_state_data)
     self.statistic.print_extended_statistic
-    print "Для продолжения нажмите Enter..."
-    gets
-    clear_screen
+    push_enter_for_continue
   end
 
   private
+
+  def error_text(error)
+    puts "Ошибка #{error}"
+  end
 
   def current_state_data
     {
@@ -275,7 +302,8 @@ class RailwayControl
 
   def gets_integer
     input = gets.chomp.lstrip.rstrip
-    return (input.empty? || /\D/.match(input)) ? nil : input.to_i
+    puts input
+    return (input.empty? || /\D/.match(input)) ? input : input.to_i
   end
 
   def print_trains(trains)
@@ -292,8 +320,10 @@ class RailwayControl
     end
   end
 
-  def print_separator
-    puts "---"
+  def push_enter_for_continue
+    puts
+    puts "Для продолжения нажмите Enter..."
+    gets
   end
 
 end
