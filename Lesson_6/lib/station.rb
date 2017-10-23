@@ -26,6 +26,10 @@ class Station
 
   def valid?
     self.validate!
+  rescue
+    false
+  else
+    true
   end
 
   def trains_count

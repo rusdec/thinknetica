@@ -16,6 +16,10 @@ class Route
 
   def valid?
     self.validate!
+  rescue
+    false
+  else
+    true
   end
 
   def add_station(station)

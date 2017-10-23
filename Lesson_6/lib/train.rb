@@ -38,6 +38,10 @@ class Train
 
   def valid?
     self.validate!
+  rescue
+    false
+  else
+    true
   end 
 
   def self.find(train_number)
