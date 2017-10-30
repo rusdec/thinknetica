@@ -302,7 +302,6 @@ class RailwayControl
 
   def gets_integer
     input = gets.chomp.lstrip.rstrip
-    puts input
     return (input.empty? || /\D/.match(input)) ? input : input.to_i
   end
 

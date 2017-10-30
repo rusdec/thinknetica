@@ -4,6 +4,7 @@ require_relative 'railway_menu'
 railway_controller = RailwayControl.new
 menu = RailwayMenu.new
 
+railway_controller.clear_screen
 loop do
   railway_controller.print_short_statistic
   puts "---"
