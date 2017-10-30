@@ -19,7 +19,7 @@ class Train
 
   RGXP_TRAIN_NUMBER_FORMAT = /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i
 
-  attr_reader :speed, :number, :current_station_index, :route
+  attr_reader :speed, :number, :current_station_index, :route, :wagons
 
   def initialize(number)
     @number = number
@@ -36,12 +36,19 @@ class Train
     true
   end
 
+  def type(train_class)
+    Train::TYPES.select { |type| type[:type] == train_class }
+  end
+
+  def each_wagon(&block)
+    self.wagons.each { |wagon| block.call(wagon) } if block_given?
+  end
+
   def valid?
     self.validate!
+    true
   rescue
     false
-  else
-    true
   end 
 
   def self.find(train_number)
@@ -59,10 +66,14 @@ class Train
   def stop
     @speed = 0
   end
+
+  def to_s
+    "Поезд '№#{self.number}' тип '#{self.class}' вагонов '#{wagons_count}'"
+  end
   
-  def add_wagon wagon
+  def add_wagon(wagon)
     raise StandardError, "Нельзя прицепить: поезд движется" if self.speed > 0
-    
+     
     @wagons << wagon  
   end
   
@@ -74,7 +85,7 @@ class Train
   end
 
   def wagons_count
-    @wagons.length
+    self.wagons.length
   end
 
   def route=(route)

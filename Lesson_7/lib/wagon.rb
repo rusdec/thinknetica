@@ -4,10 +4,20 @@ class Wagon
 
   include Manufactura
 
+  TYPES = [
+    {
+      type: 'CargoWagon',
+      name: 'Грузовой'
+    },
+    {
+      type: 'PassengerWagon',
+      name: 'Пассажирский'
+    }
+  ]
+
   attr_reader :number
 
   def initialize
-    @number = generate_number
   end
 
   def generate_number

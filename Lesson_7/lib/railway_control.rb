@@ -23,12 +23,13 @@ require_relative 'railway_statistic'
 
 class RailwayControl
 
-  attr_reader :stations, :routes, :trains, :statistic
+  attr_reader :stations, :routes, :trains, :statistic 
   
   def initialize
     @stations = []
     @routes = []
     @trains = []
+    @wagons = []
     @statistic = RailwayStatistic.new
   end
 
@@ -128,12 +129,60 @@ class RailwayControl
     validate!(train_index, self.trains)
 
     case self.trains[train_index].class.to_s
-      when 'CargoTrain' then wagon = CargoWagon.new
-      when 'PassengerTrain' then wagon = PassengerWagon.new
+      when 'CargoTrain'
+        volume = gets_volume
+        wagon = CargoWagon.new(volume)
+      when 'PassengerTrain'
+        number_of_seats = gets_number_of_seats
+        wagon = PassengerWagon.new(number_of_seats)
     end
 
     self.trains[train_index].add_wagon wagon
     "Вагон добавлен к поезду №#{self.trains[train_index].number}"
+  end
+
+  def use_wagon
+    return if self.trains.empty?
+
+    self.print_all_trains
+    train_index = gets_train_index
+    validate!(train_index, self.trains)
+
+    print_wagons(self.trains[train_index])
+    wagon_index = gets_wagon_index
+    validate!(wagon_index, self.trains[train_index].wagons)
+
+    case self.trains[train_index].class.to_s
+      when 'CargoTrain'
+        volume = gets_volume
+        self.trains[train_index].wagons[wagon_index].load(volume)
+      when 'PassengerTrain'
+        self.trains[train_index].wagons[wagon_index].busy_seat
+    end
+
+    "Пространство в вагоне №#{self.trains[train_index].wagons[wagon_index].number} поезда №#{self.trains[train_index].number} было успешно занято"
+  end
+
+  def free_wagon
+    return if self.trains.empty?
+
+    self.print_all_trains
+    train_index = gets_train_index
+    validate!(train_index, self.trains)
+
+    print_wagons(self.trains[train_index])
+    wagon_index = gets_wagon_index
+    validate!(wagon_index, self.trains[train_index].wagons)
+
+    case self.trains[train_index].class.to_s
+      when 'CargoTrain'
+        volume = gets_volume
+        self.trains[train_index].wagons[wagon_index].unload(volume)
+      when 'PassengerTrain'
+        self.trains[train_index].wagons[wagon_index].free_seat
+    end
+
+    "Пространство в вагоне №#{self.trains[train_index].wagons[wagon_index].number} поезда №#{self.trains[train_index].number} освобождено"
   end
 
   def delete_wagon_from_train
@@ -177,22 +226,35 @@ class RailwayControl
     end
   end
 
-  def print_trains_on_station
-    return if self.trains.empty? || self.stations.empty?
+  def print_trains_on_one_station
+    return if self.stations.empty?
 
     self.clear_screen
 
     self.print_stations
     station_index = gets_station_index
     validate!(station_index, self.stations)
+    
+    self.clear_screen
 
-    trains = [] 
-    self.stations[station_index].trains.each { |number, train| trains << train }
-    print_trains(trains)
+    print_trains_on_station(stations[station_index])
 
     push_enter_for_continue
   end
- 
+
+  def print_trains_on_each_station
+    return if self.stations.empty?
+
+    self.clear_screen
+
+    self.stations.each do |station|
+      print_trains_on_station(station)
+      puts
+    end
+
+    push_enter_for_continue
+  end 
+
   def print_stations_only
     self.clear_screen
     print_stations
@@ -260,6 +322,11 @@ class RailwayControl
     } 
   end
 
+  def gets_wagon_type_index
+    print "Введите индекс типа вагона: "
+    gets_integer
+  end
+
   def gets_train_type_index
     print "Введите индекс типа поезда: "
     gets_integer
@@ -272,6 +339,11 @@ class RailwayControl
   
   def gets_last_station_index
     print "Введите индекс конечной станции: "
+    gets_integer
+  end
+
+  def gets_wagon_index
+    print "Введите индекс вагона: "
     gets_integer
   end
 
@@ -300,9 +372,32 @@ class RailwayControl
     gets_integer
   end
 
+  def gets_number_of_seats
+    print "Введите кол-во мест в вагоне: "
+    gets_integer
+  end
+
+  def gets_volume
+    print "Введите объём: "
+    gets_integer
+  end
+
   def gets_integer
     input = gets.chomp.lstrip.rstrip
     return (input.empty? || /\D/.match(input)) ? input : input.to_i
+  end
+
+  def print_wagons(train)
+    train.wagons.each_with_index { |wagon, index| puts "[#{index}] #{wagon}" }
+  end
+
+  def print_trains_on_station(station)
+    puts "Станция: #{station.name} (поездов: #{station.trains.length})"
+    station.each_train do |train|
+      puts "#{train}"
+      train.each_wagon { |wagon| puts "#{wagon}" }
+      puts 
+    end
   end
 
   def print_trains(trains)
