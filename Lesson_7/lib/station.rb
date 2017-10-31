@@ -26,10 +26,14 @@ class Station
 
   def valid?
     self.validate!
+    true
   rescue
     false
-  else
-    true
+  end
+
+
+  def each_train(&block)
+    @trains.each { |number,train| block.call(train) } if block_given?
   end
 
   def trains_count

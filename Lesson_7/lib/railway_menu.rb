@@ -7,6 +7,10 @@ class RailwayMenu
   def initialize
     @action_menu = [
       {
+        type: :separator,
+        title:  "Станции",
+      },
+      {
         message:  :create_station,
         title:    'Создать станцию',
         type:     :message,
@@ -17,12 +21,18 @@ class RailwayMenu
         type:     :message,
       },
       {
-        message: :print_trains_on_station,
+        message: :print_trains_on_one_station,
         title:   'Вывести список поездов на станции',
         type:     :message,
       },
       {
+        message: :print_trains_on_each_station,
+        title:   'Вывести список поездов по станциям',
+        type:     :message,
+      },
+      {
         type: :separator,
+        title:  "Маршруты",
       },
       {
         message:  :create_route,
@@ -45,7 +55,8 @@ class RailwayMenu
         type:     :message,
       },
       {
-        type: :separator
+        type: :separator,
+        title:  "Поезда",
       },
       {
         message:  :create_train,
@@ -63,16 +74,6 @@ class RailwayMenu
         type:     :message,
       },
       {
-        message:  :add_wagon_to_train,
-        title:    'Прицепить вагон к поезду',
-        type:     :message,
-      },
-      {
-        message:  :delete_wagon_from_train,
-        title:    'Отцепить вагон от поезда',
-        type:     :message,
-      },
-      {
         message:  :move_train_forward,
         title:    'Переместить поезд по маршруту вперёд',
         type:     :message,
@@ -83,7 +84,36 @@ class RailwayMenu
         type:     :message,
       },
       {
-        type: :separator
+        message:  :wagons_by_train,
+        title:    'Вывести список вагонов у поезда',
+        type:     :message,
+      },
+      {
+        type: :separator,
+        title:  "Вагоны", 
+      },
+      {
+        message:  :add_wagon_to_train,
+        title:    'Прицепить вагон к поезду',
+        type:     :message,
+      },
+      {
+        message:  :delete_wagon_from_train,
+        title:    'Отцепить вагон от поезда',
+        type:     :message,
+      },
+      {
+        message:  :use_wagon,
+        title:    'Использовать место в вагоне',
+        type:     :message,
+      },
+      {
+        message:  :free_wagon,
+        title:    'Освободить место в вагоне',
+        type:     :message,
+      },
+      {
+        type:   :separator,
       },
       {
         message:  :print_extended_statistic,
@@ -103,7 +133,11 @@ class RailwayMenu
     self.action_menu.each_with_index do |item, index|
       case item[:type]
         when :separator
-          puts
+          if item[:title].nil?
+            puts
+          else
+            puts "\n[#{item[:title]}]"
+          end
         when :exit
           @exit_index = index
           self.print_menu_item(index,item)
