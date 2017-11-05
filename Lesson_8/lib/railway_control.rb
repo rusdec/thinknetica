@@ -1,15 +1,3 @@
-=begin
-Создать программу в файле main.rb, которая будет позволять пользователю через текстовый интерфейс делать следующее:
-  - Создавать станции
-  - Создавать поезда
-  - Создавать маршруты и управлять станциями в нем (добавлять, удалять)
-  - Назначать маршрут поезду
-  - Добавлять вагоны к поезду
-  - Отцеплять вагоны от поезда
-  - Перемещать поезд по маршруту вперед и назад
-  - Просматривать список станций и список поездов на станции
-=end
-
 require_relative 'cargo_train'
 require_relative 'cargo_wagon'
 
@@ -22,9 +10,8 @@ require_relative 'route'
 require_relative 'railway_statistic'
 
 class RailwayControl
+  attr_reader :stations, :routes, :trains, :statistic
 
-  attr_reader :stations, :routes, :trains, :statistic 
-  
   def initialize
     @stations = []
     @routes = []
@@ -35,248 +22,179 @@ class RailwayControl
 
   def create_station
     station_name = gets_station_name
-    station = Station.new(station_name)
+    @stations << Station.new(station_name)
 
-    @stations << station
     "Станция '#{station_name}' создана"
   end
 
   def create_train
-    Train::TYPES.each_with_index do |train_type, index|
-      puts "[#{index}] #{train_type[:name]}"
-    end
-    type_index = gets_train_type_index
-    validate!(type_index, Train::TYPES)
+    train_type = gets_train_type
 
     number = gets_train_number
-    case Train::TYPES[type_index][:type]
-      when 'CargoTrain' then train = CargoTrain.new(number)
-      when 'PassengerTrain' then train = PassengerTrain.new(number)
+    case train_type[:type]
+    when 'CargoTrain' then train = CargoTrain.new(number)
+    when 'PassengerTrain' then train = PassengerTrain.new(number)
     end
-    rescue StandardError => error
-      clear_screen
-      puts error 
-      retry
-    else
-      @trains << train
-      "Поезд '№#{number}' тип '#{Train::TYPES[type_index][:name]}' создан"
+  rescue StandardError => error
+    clear_screen
+    puts error
+    retry
+  else
+    @trains << train
+    "Поезд '№#{number}' тип '#{train_type[:name]}' создан"
   end
 
   def create_route
-    return if self.stations.length < 2
-    
-    self.print_stations
+    raise StandardError, 'Нужны минимум 2 созданные станции' if stations.length < 2
 
-    first_station_index = gets_first_station_index
-    validate!(first_station_index, self.stations)
+    first_station = gets_station { puts 'Начальная станция:' }
+    last_station = gets_station { puts 'Конечная станция:' }
 
-    last_station_index = gets_last_station_index
-    validate!(last_station_index, self.stations)
-      
-    self.routes << Route.new(self.stations[first_station_index], self.stations[last_station_index])
-    "Маршрут '#{self.stations[first_station_index].name} -> #{self.stations[last_station_index].name}' создан"
+    routes << Route.new(first_station, last_station)
+
+    "Маршрут '#{first_station.name} -> #{last_station.name}' создан"
   end
 
   def add_station_to_route
-    return if self.routes.empty?
+    raise StandardError, 'Нет маршрутов' if routes.empty?
 
-    self.print_stations
-    station_index = gets_station_index
+    station = gets_station
+    route = gets_route
 
-    self.print_routes
-    route_index = gets_route_index
-
-    validate!(station_index, self.stations)
-    validate!(route_index, self.routes)
-
-    self.routes[route_index].add_station(stations[station_index])
-    "Станция '#{stations[station_index].name}' добавлена в маршрут"
+    route.add_station(station)
+    "Станция '#{station.name}' добавлена в маршрут"
   end
 
   def delete_station_from_route
-    return if self.routes.empty?
+    raise StandardError, 'Нет маршрутов' if routes.empty?
 
-    self.print_routes
-    route_index = gets_route_index
-    validate!(route_index, self.routes)
+    route = gets_route
+    route.delete_station
 
-    station_name = self.routes[route_index].stations[-2].name
-    self.routes[route_index].delete_station
-    "Станция '#{station_name}' удалена из маршрута"
+    "Станция '#{route.stations[-2].name}' удалена из маршрута"
   end
 
   def add_route_to_train
-    return if self.trains.empty? || self.routes.empty?
+    raise StandardError, 'Нет поездов' if trains.empty?
+    raise StandardError, 'Нет маршрутов' if routes.empty?
 
-    self.print_routes
-    route_index = gets_route_index
+    train = gets_train
 
-    self.print_all_trains
-    train_index = gets_train_index
-
-    validate!(route_index, self.routes)
-    validate!(train_index, self.trains)
-    
-    self.trains[train_index].route=(self.routes[route_index])    
-    "Маршрут добавлен к поезду №#{self.trains[train_index].number}"
+    train.route = gets_route
+    "Маршрут добавлен к поезду №#{train.number}"
   end
 
   def add_wagon_to_train
-    return if self.trains.empty?
+    raise StandardError, 'Нет поездов' if trains.empty?
 
-    self.print_all_trains
-    train_index = gets_train_index
-    validate!(train_index, self.trains)
+    train = gets_train
 
-    case self.trains[train_index].class.to_s
-      when 'CargoTrain'
-        volume = gets_volume
-        wagon = CargoWagon.new(volume)
-      when 'PassengerTrain'
-        number_of_seats = gets_number_of_seats
-        wagon = PassengerWagon.new(number_of_seats)
+    case train.class.to_s
+    when 'CargoTrain' then train.add_wagon(create_cargo_wagon)
+    when 'PassengerTrain' then train.add_wagon(create_passenger_wagon)
     end
 
-    self.trains[train_index].add_wagon wagon
-    "Вагон добавлен к поезду №#{self.trains[train_index].number}"
+    "Вагон добавлен к поезду №#{train.number}"
   end
 
   def use_wagon
-    return if self.trains.empty?
+    raise StandardError, 'Нет поездов' if trains.empty?
 
-    self.print_all_trains
-    train_index = gets_train_index
-    validate!(train_index, self.trains)
+    train = gets_train
+    raise StandardError, 'Нет вагонов' if train.wagons.empty?
+    wagon = gets_wagon(train)
 
-    print_wagons(self.trains[train_index])
-    wagon_index = gets_wagon_index
-    validate!(wagon_index, self.trains[train_index].wagons)
-
-    case self.trains[train_index].class.to_s
-      when 'CargoTrain'
-        volume = gets_volume
-        self.trains[train_index].wagons[wagon_index].load(volume)
-      when 'PassengerTrain'
-        self.trains[train_index].wagons[wagon_index].busy_seat
+    case train.class.to_s
+    when 'CargoTrain' then use_cargo_wagon(wagon)
+    when 'PassengerTrain' then wagon.busy_seat
     end
 
-    "Пространство в вагоне №#{self.trains[train_index].wagons[wagon_index].number} поезда №#{self.trains[train_index].number} было успешно занято"
+    "Пространство в вагоне №#{wagon.number} поезда №#{train.number} было успешно занято"
   end
 
   def free_wagon
-    return if self.trains.empty?
+    raise StandardError, 'Нет поездов' if trains.empty?
 
-    self.print_all_trains
-    train_index = gets_train_index
-    validate!(train_index, self.trains)
+    train = gets_train
+    wagon = gets_wagon(train)
 
-    print_wagons(self.trains[train_index])
-    wagon_index = gets_wagon_index
-    validate!(wagon_index, self.trains[train_index].wagons)
-
-    case self.trains[train_index].class.to_s
-      when 'CargoTrain'
-        volume = gets_volume
-        self.trains[train_index].wagons[wagon_index].unload(volume)
-      when 'PassengerTrain'
-        self.trains[train_index].wagons[wagon_index].free_seat
+    case train.class.to_s
+    when 'CargoTrain' then free_cargo_wagon(wagon)
+    when 'PassengerTrain' then wagon.free_seat
     end
 
-    "Пространство в вагоне №#{self.trains[train_index].wagons[wagon_index].number} поезда №#{self.trains[train_index].number} освобождено"
+    "Пространство в вагоне №#{wagon.number} поезда №#{train.number} освобождено"
   end
 
   def delete_wagon_from_train
-    return if self.trains.empty?
+    raise StandardError, 'Нет поездов' if trains.empty?
 
-    self.print_all_trains
-    train_index = gets_train_index
-    validate!(train_index, self.trains)
-    
-    self.trains[train_index].delete_wagon
-    "Вагон отцеплен от поезда №#{self.trains[train_index].number}"
+    train = gets_train
+
+    train.delete_wagon
+    "Вагон отцеплен от поезда №#{train.number}"
   end
 
   def move_train_forward
-    return if self.trains.empty? || self.routes.empty?
-
-    self.print_all_trains
-    train_index = gets_train_index
-    validate!(train_index, self.trains)
-
-    if self.trains[train_index].route.nil?
-      "У поезда №#{self.trains[train_index].number} нет маршрута"
-    else
-      self.trains[train_index].move_forward
-      "Поезд №#{self.trains[train_index].number} прибыл на станцию '#{self.trains[train_index].current_station.name}'"
-    end
+    move_train(:move_forward)
   end
 
   def move_train_backward
-    return if self.trains.empty? || self.routes.empty?
+    move_train(:move_backward)
+  end
 
-    self.print_all_trains
-    train_index = gets_train_index
-    validate!(train_index, self.trains)
-
-    if self.trains[train_index].route.nil?
-      "У поезда №#{self.trains[train_index].number} нет маршрута"
-    else
-      self.trains[train_index].move_backward
-      "Поезд №#{self.trains[train_index].number} прибыл на станцию '#{self.trains[train_index].current    _station.name}'"
+  def print_train_types
+    Train::TYPES.each_with_index do |train_type, index|
+      puts "[#{index}] #{train_type[:name]}"
     end
   end
 
   def print_trains_on_one_station
-    return if self.stations.empty?
+    raise StandardError, 'Нет станций' if stations.empty?
 
-    self.clear_screen
+    station = gets_station
 
-    self.print_stations
-    station_index = gets_station_index
-    validate!(station_index, self.stations)
-    
-    self.clear_screen
-
-    print_trains_on_station(stations[station_index])
+    clear_screen
+    print_trains_on_station(station)
 
     push_enter_for_continue
   end
 
   def print_trains_on_each_station
-    return if self.stations.empty?
+    raise StandardError, 'Нет станций' if stations.empty?
 
-    self.clear_screen
+    clear_screen
 
-    self.stations.each do |station|
+    stations.each do |station|
       print_trains_on_station(station)
       puts
     end
 
     push_enter_for_continue
-  end 
+  end
 
   def print_stations_only
-    self.clear_screen
+    clear_screen
     print_stations
     push_enter_for_continue
   end
- 
+
   def print_stations
-    self.stations.each_with_index { |station, index| puts "[#{index}] #{station.name}" }
+    stations.each_with_index { |station, index| puts "[#{index}] #{station.name}" }
   end
 
   def print_routes_only
-    self.clear_screen
+    clear_screen
     print_routes
     push_enter_for_continue
   end
 
   def print_routes
-    self.routes.each_with_index do |route, index|
+    routes.each_with_index do |route, index|
       stations = []
       route.stations.each { |station| stations << station.name }
-      puts "[#{index}] #{stations.join(" -> ")}"
-    end  
+      puts "[#{index}] #{stations.join(' -> ')}"
+    end
   end
 
   def validate!(index, object)
@@ -284,13 +202,13 @@ class RailwayControl
   end
 
   def print_all_trains_only
-    self.clear_screen
+    clear_screen
     print_all_trains
     push_enter_for_continue
   end
 
   def print_all_trains
-    print_trains(self.trains)
+    print_trains(trains)
   end
 
   def clear_screen
@@ -298,13 +216,13 @@ class RailwayControl
   end
 
   def print_short_statistic
-    self.statistic.calculate_short_statistic(current_state_data)
-    self.statistic.print_short_statistic
+    statistic.calculate_short_statistic(current_state_data)
+    statistic.print_short_statistic
   end
 
   def print_extended_statistic
-    self.statistic.calculate_extended_statistic(current_state_data)
-    self.statistic.print_extended_statistic
+    statistic.calculate_extended_statistic(current_state_data)
+    statistic.print_extended_statistic
     push_enter_for_continue
   end
 
@@ -316,75 +234,90 @@ class RailwayControl
 
   def current_state_data
     {
-      trains: self.trains,
-      routes: self.routes,
-      stations: self.stations
-    } 
+      trains: trains,
+      routes: routes,
+      stations: stations
+    }
   end
 
-  def gets_wagon_type_index
-    print "Введите индекс типа вагона: "
-    gets_integer
+  def gets_train_type
+    clear_screen
+    print_train_types
+    print 'Введите индекс типа поезда: '
+    type_index = gets_integer
+    validate!(type_index, Train::TYPES)
+
+    Train::TYPES[type_index]
   end
 
-  def gets_train_type_index
-    print "Введите индекс типа поезда: "
-    gets_integer
-  end
+  def gets_wagon(train)
+    clear_screen
+    print_wagons(train)
+    print 'Введите индекс вагона: '
+    wagon_index = gets_integer
+    validate!(wagon_index, train.wagons)
 
-  def gets_first_station_index
-    print "Введите индекс начальной станции: "
-    gets_integer
-  end
-  
-  def gets_last_station_index
-    print "Введите индекс конечной станции: "
-    gets_integer
-  end
-
-  def gets_wagon_index
-    print "Введите индекс вагона: "
-    gets_integer
+    train.wagons[wagon_index]
   end
 
   def gets_station_name
-    print "Введите название станции: "
-    gets.chomp.lstrip.rstrip
+    clear_screen
+    print 'Введите название станции: '
+    gets.chomp.strip
   end
 
-  def gets_station_index
-    print "Введите индекс станции: "
-    gets_integer
+  def gets_station
+    clear_screen
+    yield if block_given?
+    print_stations
+    print 'Введите индекс станции: '
+    station_index = gets_integer
+    validate!(station_index, stations)
+
+    stations[station_index]
   end
 
   def gets_train_number
-    print "Задайте номер поезда: "
-    gets.chomp.lstrip.rstrip
+    clear_screen
+    print 'Задайте номер поезда: '
+    gets.chomp.strip
   end
 
-  def gets_train_index
-    print "Введите индекс поезда: "
-    gets_integer
+  def gets_train
+    clear_screen
+    print_all_trains
+    print 'Введите индекс поезда: '
+    train_index = gets_integer
+    validate!(train_index, trains)
+
+    trains[train_index]
   end
 
-  def gets_route_index
-    print "Введите индекс маршрута: "
-    gets_integer
+  def gets_route
+    clear_screen
+    print_routes
+    print 'Введите индекс маршрута: '
+    route_index = gets_integer
+    validate!(route_index, routes)
+
+    routes[route_index]
   end
 
   def gets_number_of_seats
-    print "Введите кол-во мест в вагоне: "
+    clear_screen
+    print 'Введите кол-во мест в вагоне: '
     gets_integer
   end
 
   def gets_volume
-    print "Введите объём: "
+    clear_screen
+    print 'Введите объём: '
     gets_integer
   end
 
   def gets_integer
-    input = gets.chomp.lstrip.rstrip
-    return (input.empty? || /\D/.match(input)) ? input : input.to_i
+    input = gets.chomp.strip
+    input.empty? || /\D/.match(input) ? input : input.to_i
   end
 
   def print_wagons(train)
@@ -394,30 +327,60 @@ class RailwayControl
   def print_trains_on_station(station)
     puts "Станция: #{station.name} (поездов: #{station.trains.length})"
     station.each_train do |train|
-      puts "#{train}"
-      train.each_wagon { |wagon| puts "#{wagon}" }
-      puts 
+      puts train.to_s
+      train.each_wagon { |wagon| puts wagon.to_s }
+      puts
     end
   end
 
   def print_trains(trains)
     trains.each_with_index do |train, index|
-      train_type = train.class.to_s
-      type = Train::TYPES.select { |train| train[:type] == train_type }
       printable_data = [
         "[#{index}] Поезд №#{train.number}",
-        "Тип: #{type[0][:name]}",
-        "Вагонов: #{train.wagons_count}",
+        "Тип: #{train.type[0][:name]}",
+        "Вагонов: #{train.wagons_count}"
       ]
       printable_data << "Текущая станция: #{train.current_station.name}" unless train.route.nil?
-      puts printable_data.join(" | ")
+      puts printable_data.join(' | ')
     end
   end
 
   def push_enter_for_continue
-    puts
-    puts "Для продолжения нажмите Enter..."
+    puts 'Для продолжения нажмите Enter...'
     gets
   end
 
+  def move_train(move_direction)
+    raise StandardError, 'Нет поездов' if trains.empty?
+    raise StandardError, 'Нет маршрутов' if routes.empty?
+
+    train = gets_train
+    raise StandardError, "У поезда №#{train.number} нет маршрута" if train.route.nil?
+
+    train.public_send move_direction
+
+    "Поезд №#{train.number} прибыл на станцию '#{train.current_station.name}'"
+  end
+
+  def free_cargo_wagon(wagon)
+    volume = gets_volume
+    wagon.unload(volume)
+  end
+
+  def use_cargo_wagon(wagon)
+    volume = gets_volume
+    wagon.load(volume)
+  end
+
+  def use_passenger_wagon(wagon)
+    wagon.busy_seat
+  end
+
+  def create_cargo_wagon
+    CargoWagon.new(gets_volume)
+  end
+
+  def create_passenger_wagon
+    PassengerWagon.new(gets_number_of_seats)
+  end
 end

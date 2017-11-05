@@ -1,7 +1,6 @@
 require_relative 'manufactura'
 
 class Wagon
-
   include Manufactura
 
   TYPES = [
@@ -13,12 +12,9 @@ class Wagon
       type: 'PassengerWagon',
       name: 'Пассажирский'
     }
-  ]
+  ].freeze
 
   attr_reader :number
-
-  def initialize
-  end
 
   def generate_number
     srand.to_s.slice(0..7)
