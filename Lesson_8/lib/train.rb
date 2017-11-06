@@ -1,7 +1,6 @@
 require_relative 'manufactura'
 
 class Train
-
   include Manufactura
 
   TYPES = [
@@ -13,11 +12,11 @@ class Train
       type: 'PassengerTrain',
       name: 'Пассажирский'
     }
-  ]
+  ].freeze
 
   @@trains = {}
 
-  RGXP_TRAIN_NUMBER_FORMAT = /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i
+  TRAIN_NUMBER_FORMAT = /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i
 
   attr_reader :speed, :number, :current_station_index, :route, :wagons
 
@@ -30,26 +29,26 @@ class Train
     @@trains[number] = self
     validate!
   end
- 
+
   def validate!
-    raise StandardError, "Неправильный формат номера (#{self.number})" if self.number !~ RGXP_TRAIN_NUMBER_FORMAT
+    raise StandardError, "Неправильный формат номера (#{number})" if number !~ TRAIN_NUMBER_FORMAT
     true
   end
 
-  def type(train_class)
-    Train::TYPES.select { |type| type[:type] == train_class }
+  def type
+    Train::TYPES.select { |type| type[:type] == self.class.to_s }
   end
 
-  def each_wagon(&block)
-    self.wagons.each { |wagon| block.call(wagon) } if block_given?
+  def each_wagon
+    wagons.each { |wagon| yield(wagon) } if block_given?
   end
 
   def valid?
-    self.validate!
+    validate!
     true
-  rescue
+  rescue StandardError
     false
-  end 
+  end
 
   def self.find(train_number)
     @@trains[train_number]
@@ -60,7 +59,7 @@ class Train
   end
 
   def speed_down(n)
-    @speed = (self.speed - n >= 0) ? self.speed - n : stop
+    @speed = speed - n >= 0 ? speed - n : stop
   end
 
   def stop
@@ -68,67 +67,67 @@ class Train
   end
 
   def to_s
-    "Поезд '№#{self.number}' тип '#{self.class}' вагонов '#{wagons_count}'"
+    "Поезд '№#{number}' тип '#{self.class}' вагонов '#{wagons_count}'"
   end
-  
+
   def add_wagon(wagon)
-    raise StandardError, "Нельзя прицепить: поезд движется" if self.speed > 0
-     
-    @wagons << wagon  
+    raise StandardError, 'Нельзя прицепить: поезд движется' if speed > 0
+
+    @wagons << wagon
   end
-  
+
   def delete_wagon
-    raise StandardError, "У поезда нет прицепленных вагонов" if wagons_count == 0
-    raise StandardError, "Нельзя отцепить: поезд движется" if self.speed > 0
+    raise StandardError, 'У поезда нет прицепленных вагонов' if wagons_count.zero?
+    raise StandardError, 'Нельзя отцепить: поезд движется' if speed > 0
 
     @wagons.pop
   end
 
   def wagons_count
-    self.wagons.length
+    wagons.length
   end
 
   def route=(route)
-    raise StandardError, "В качестве маршрута можно назначить только маршрут" unless route.is_a?(Route)
-      
+    raise StandardError, 'Аргумент не является типом Route' unless route.is_a?(Route)
+
     @route = route
     @current_station_index = 0
-    self.current_station.place_train(self)
+    current_station.place_train(self)
   end
 
   def current_station
-    station(self.current_station_index)
+    station(current_station_index)
   end
 
   def previous_station
-    station(self.current_station_index-1)
+    station(current_station_index - 1)
   end
 
   def next_station
-    station(self.current_station_index+1)
+    station(current_station_index + 1)
   end
 
   def move_forward
-    raise StandardError, "Это конечная станция" unless next_station
+    raise StandardError, 'Это конечная станция' unless next_station
 
-    move(self.current_station_index + 1)
+    move(current_station_index + 1)
   end
-  
+
   def move_backward
-    raise StandardError, "Это начальная станция" unless previous_station
+    raise StandardError, 'Это начальная станция' unless previous_station
 
-    move(self.current_station_index - 1)
+    move(current_station_index - 1)
   end
-  
-  protected 
+
+  protected
 
   def move(n)
-    current_station.send_train(self.number) 
+    current_station.send_train(number)
     @current_station_index = n
     current_station.place_train(self)
   end
 
   def station(n)
-    (n >= 0 && n < self.route.stations.length) ? self.route.stations[n] : nil
+    n >= 0 && n < route.stations.length ? route.stations[n] : nil
   end
 end

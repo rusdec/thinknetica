@@ -1,149 +1,37 @@
 require_relative 'train'
+require 'yaml'
 
 class RailwayMenu
-
   attr_reader :action_menu, :exit_index
-  
+
   def initialize
-    @action_menu = [
-      {
-        type: :separator,
-        title:  "Станции",
-      },
-      {
-        message:  :create_station,
-        title:    'Создать станцию',
-        type:     :message,
-      },
-      {
-        message:  :print_stations_only,
-        title:    'Вывести список станций',
-        type:     :message,
-      },
-      {
-        message: :print_trains_on_one_station,
-        title:   'Вывести список поездов на станции',
-        type:     :message,
-      },
-      {
-        message: :print_trains_on_each_station,
-        title:   'Вывести список поездов по станциям',
-        type:     :message,
-      },
-      {
-        type: :separator,
-        title:  "Маршруты",
-      },
-      {
-        message:  :create_route,
-        title:    'Создать маршрут',
-        type:     :message,
-      },
-      {
-        message:  :print_routes_only,
-        title:    'Вывести список маршрутов',
-        type:     :message,
-      },
-      {
-        message:  :add_station_to_route,
-        title:    'Добавить станцию в маршрут',
-        type:     :message,
-      },
-      {
-        message:  :delete_station_from_route,
-        title:    'Удалить станцию из маршрута',
-        type:     :message,
-      },
-      {
-        type: :separator,
-        title:  "Поезда",
-      },
-      {
-        message:  :create_train,
-        title:    'Создать поезд',
-        type:     :message,
-      },
-      {
-        message:  :print_all_trains_only,
-        title:    'Вывести список поездов',
-        type:     :message,
-      },
-      {
-        message:  :add_route_to_train,
-        title:    'Назначать маршрут поезду',
-        type:     :message,
-      },
-      {
-        message:  :move_train_forward,
-        title:    'Переместить поезд по маршруту вперёд',
-        type:     :message,
-      },
-      {
-        message:  :move_train_backward,
-        title:    'Переместить поезд по маршруту назад',
-        type:     :message,
-      },
-      {
-        message:  :wagons_by_train,
-        title:    'Вывести список вагонов у поезда',
-        type:     :message,
-      },
-      {
-        type: :separator,
-        title:  "Вагоны", 
-      },
-      {
-        message:  :add_wagon_to_train,
-        title:    'Прицепить вагон к поезду',
-        type:     :message,
-      },
-      {
-        message:  :delete_wagon_from_train,
-        title:    'Отцепить вагон от поезда',
-        type:     :message,
-      },
-      {
-        message:  :use_wagon,
-        title:    'Использовать место в вагоне',
-        type:     :message,
-      },
-      {
-        message:  :free_wagon,
-        title:    'Освободить место в вагоне',
-        type:     :message,
-      },
-      {
-        type:   :separator,
-      },
-      {
-        message:  :print_extended_statistic,
-        title:    'Вывести статистику',
-        type:     :message,
-      },
-      {
-        type: :exit,
-        title: 'Выход',
-      },
-    ]
+    @action_menu = parse_menu_from_file('menu.yml')
     @exit_index = nil
   end
 
   def print_menu
-    puts "Выберите действие:"
-    self.action_menu.each_with_index do |item, index|
+    puts 'Выберите действие:'
+    action_menu.each_with_index do |item, index|
       case item[:type]
-        when :separator
-          if item[:title].nil?
-            puts
-          else
-            puts "\n[#{item[:title]}]"
-          end
-        when :exit
-          @exit_index = index
-          self.print_menu_item(index,item)
-        else self.print_menu_item(index,item)
+      when :separator then puts item[:title].nil? ? '' : "\n[#{item[:title]}]"
+      when :exit
+        @exit_index = index
+        print_menu_item(index, item)
+      else print_menu_item(index, item)
       end
     end
+  end
+
+  def parse_menu_from_file(file_name)
+    raise StandardError, "Файл меню не найден (#{file_name})" unless File.exist?(file_name)
+    raise StandardError, "Файл меню пустой (#{file_name})" if File.zero?(file_name)
+
+    menu_items = YAML.load_file(file_name)
+    raise StandardError, 'Ошибка формата меню' unless menu_items.is_a?(Array)
+
+    menu_items
+  rescue StandardError => error
+    puts error
   end
 
   def print_menu_item(index, item)
@@ -151,11 +39,10 @@ class RailwayMenu
   end
 
   def title(index)
-    self.action_menu[index][:title]
+    action_menu[index][:title]
   end
 
   def message(index)
-    self.action_menu[index][:message]
+    action_menu[index][:message]
   end
-
 end
