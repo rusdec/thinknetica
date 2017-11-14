@@ -24,7 +24,7 @@ loop do
     result = railway_controller.public_send menu.message(action_index)
   rescue StandardError => error
     railway_controller.clear_screen
-    puts "Ошибка: #{error.backtrace.inspect}"
+    puts "Ошибка: #{error}"
   else
     railway_controller.clear_screen
     puts result

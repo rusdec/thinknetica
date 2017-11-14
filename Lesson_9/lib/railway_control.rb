@@ -38,6 +38,7 @@ class RailwayControl
   rescue StandardError => error
     clear_screen
     puts error
+    push_enter_for_continue
     retry
   else
     @trains << train

@@ -1,9 +1,17 @@
+require_relative 'validation'
+
 class Station
+
+  include Validation
+
+  NAME_FORMAT = /^[a-zа-я]{1,30}([ \-][a-zа-я]{1,30})?([ \-][a-zа-я]{1,30})?([ \-][\d]{1,4})?$/i
+
   attr_reader :name, :trains
 
   @@stations = []
 
-  RGXP_NAME = /^[a-zа-я]{1,30}([ \-][a-zа-я]{1,30})?([ \-][a-zа-я]{1,30})?([ \-][\d]{1,4})?$/i
+  validate :name, :type, String
+  validate :name, :format, NAME_FORMAT
 
   def self.all
     @@stations
@@ -16,18 +24,6 @@ class Station
     validate!
 
     @@stations << self
-  end
-
-  def validate!
-    raise StandardError, "Неправильное имя (#{name})" if name !~ RGXP_NAME
-    true
-  end
-
-  def valid?
-    validate!
-    true
-  rescue StandardError
-    false
   end
 
   def each_train

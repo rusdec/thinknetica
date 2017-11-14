@@ -1,7 +1,9 @@
 require_relative 'manufactura'
+require_relative 'validation'
 
 class Train
   include Manufactura
+  include Validation
 
   TYPES = [
     {
@@ -16,9 +18,9 @@ class Train
 
   @@trains = {}
 
-  TRAIN_NUMBER_FORMAT = /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i
-
   attr_reader :speed, :number, :current_station_index, :route, :wagons
+
+  validate :number, :format, /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i
 
   def initialize(number)
     @number = number
@@ -30,24 +32,12 @@ class Train
     validate!
   end
 
-  def validate!
-    raise StandardError, "Неправильный формат номера (#{number})" if number !~ TRAIN_NUMBER_FORMAT
-    true
-  end
-
   def type
     Train::TYPES.select { |type| type[:type] == self.class.to_s }
   end
 
   def each_wagon
     wagons.each { |wagon| yield(wagon) } if block_given?
-  end
-
-  def valid?
-    validate!
-    true
-  rescue StandardError
-    false
   end
 
   def self.find(train_number)
