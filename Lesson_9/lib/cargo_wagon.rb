@@ -1,7 +1,11 @@
 require_relative 'wagon'
+require_relative 'accessors'
 
 class CargoWagon < Wagon
+  include Accessors
+
   attr_reader :total_volume
+  attr_accessor_with_history :dynamic
 
   def initialize(total_volume)
     raise StandardError, 'Объём должен быть целым числом' unless total_volume.is_a?(Integer)
@@ -15,11 +19,13 @@ class CargoWagon < Wagon
   def load(volume)
     raise StandardError, 'Нехватает свободного объёма' if self.volume + volume > total_volume
     self.volume += volume
+    self.dynamic = self.volume
   end
 
   def unload(volume)
     raise StandardError, 'Объём не может быть отрицательным' if self.volume - volume < 0
     self.volume -= volume
+    self.dynamic = self.volume
   end
 
   def free_volume
@@ -31,7 +37,7 @@ class CargoWagon < Wagon
   end
 
   def to_s
-    "Вагон '№#{number}' тип '#{self.class}' объём своб./зан. '#{free_volume}/#{occupied_volume}'"
+    "Вагон '№#{number}' тип '#{self.class}' объём своб.|зан. '#{free_volume}|#{occupied_volume}'"
   end
 
   protected

@@ -37,13 +37,12 @@ module Validation
       when :presence then error = 'Пустая строка или nil' if value.nil? || value.empty?
       when :format then error = "Не соответствует формату #{param}" unless param.match(value.to_s)
       when :type then error = "Ожидается тип #{param}" unless value.is_a?(param)
-      when :first_last_uniq then error = "Первый и последний эл-ты идентичны" if value[0] == value[-1]
+      when :first_last_uniq
+        error = 'Первый и последний эл-ты идентичны' if value[0] == value[-1]
       when :each_type
-        indexes = []
-        value.each_with_index do |v,index|
-          indexes << index unless v.is_a?(param)
+        if value.select { |v| v.is_a?(param) }.length.empty?
+          error = "Содержит тип, отличающийся от #{param}"
         end
-        error = "Ожидается тип #{param} (#{indexes})" unless indexes.empty?
       end
 
       error
@@ -64,22 +63,3 @@ module Validation
     end
   end
 end
-
-#class A
-#  include Validation
-
-#  attr_accessor :x, :y
-
-#  validate :x, :presence
-#  validate :x, :format, /ss/
-#  validate :x, :type, String
-
-#  def initialize
-#    @x = 's'
-#    @y = 1
-#  end
-#end
-
-#a = A.new
-#puts a.x
-#a.validate!

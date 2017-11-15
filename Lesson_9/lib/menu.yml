@@ -88,6 +88,10 @@
   :title: Освободить место в вагоне
   :type: :message
 
+- :message: :wagon_dynamic_history
+  :title: Динамика использования грузового вагона
+  :type: :message
+
 #Разное
 - :type: :separator
 

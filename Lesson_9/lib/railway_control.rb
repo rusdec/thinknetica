@@ -94,8 +94,21 @@ class RailwayControl
     when 'CargoTrain' then train.add_wagon(create_cargo_wagon)
     when 'PassengerTrain' then train.add_wagon(create_passenger_wagon)
     end
-
     "Вагон добавлен к поезду №#{train.number}"
+  end
+
+  def wagon_dynamic_history
+    raise StandardError, 'Нет поездов' if trains.empty?
+
+    train = gets_train
+    raise StandardError, 'Только грузовые поезда' unless train.is_a?(CargoTrain)
+    raise StandardError, 'Нет вагонов' if train.wagons.empty?
+
+    wagon = gets_wagon(train)
+    
+    clear_screen
+    puts "Вагон №#{wagon.number}: #{wagon.dynamic_history}"
+    push_enter_for_continue
   end
 
   def use_wagon

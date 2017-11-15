@@ -26,10 +26,10 @@ module Accessors
       define_method("#{attr_name}") do
         instance_variable_get("@#{attr_name}")
       end
-        define_method("#{attr_name}=") do |value|
-          raise "Тип должен быть #{attr_class}" unless value.is_a?(attr_class)
-          instance_variable_set("@#{attr_name}", value)
-        end
+      define_method("#{attr_name}=") do |value|
+        raise TypeError, "Тип должен быть #{attr_class}" unless value.is_a?(attr_class)
+        instance_variable_set("@#{attr_name}", value)
+      end
     end
   end
 end
