@@ -107,7 +107,7 @@ class RailwayControl
     wagon = gets_wagon(train)
     
     clear_screen
-    puts "Вагон №#{wagon.number}: #{wagon.dynamic_history}"
+    puts "Вагон №#{wagon.number}: #{wagon.volume_use_dynamic_history}"
     push_enter_for_continue
   end
 

@@ -1,17 +1,16 @@
 require_relative 'validation'
 
 class Station
-
   include Validation
 
-  NAME_FORMAT = /^[a-zа-я]{1,30}([ \-][a-zа-я]{1,30})?([ \-][a-zа-я]{1,30})?([ \-][\d]{1,4})?$/i
+  NAME_FORMAT = /^[a-zа-я]{3,30}([ \-][a-zа-я]{1,30})?([ \-][a-zа-я]{1,30})?([ \-][\d]{1,4})?$/i
 
   attr_reader :name, :trains
 
   @@stations = []
 
   validate :name, :type, String
-  validate :name, :format, NAME_FORMAT
+  validate :name, :format, NAME_FORMAT, message: 'Попробуйте другое название станции'
 
   def self.all
     @@stations

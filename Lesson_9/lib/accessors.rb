@@ -6,7 +6,6 @@ module Accessors
   module ClassMethods
     def attr_accessor_with_history(*params)
       params.each do |param|
-        raise TypeError, "Тип #{param.class} параметра не Symbol" unless param.is_a?(Symbol)
         define_method(param) do
           instance_variable_get("@#{param}")
         end
@@ -22,7 +21,6 @@ module Accessors
     end
 
     def strong_attr_accessor(attr_name, attr_class)
-      raise TypeError, "Тип #{attr.class} параметра не Symbol" unless attr_name.is_a?(Symbol)
       define_method("#{attr_name}") do
         instance_variable_get("@#{attr_name}")
       end

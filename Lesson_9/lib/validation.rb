@@ -9,14 +9,14 @@ module Validation
 
   module InstanceMethods
     def validate!
-      validations = self.class.class_variable_get('@@validations')
+      validations = self.class.instance_variable_get('@validations')
+
       errors = []
-
       validations.each do |validation|
-        value = instance_variable_get("@#{validation[:attribute]}")
-        error = find_error(value, validation[:type], validation[:param])
+        validation[:value] = instance_variable_get("@#{validation[:attribute]}")
+        error = send validation[:type], validation
 
-        errors << "#{self.class}:@#{validation[:attribute]} -> #{error}" unless error.nil?
+        errors << error unless error.nil?
       end
 
       raise ValidationError, errors unless errors.empty?
@@ -32,34 +32,46 @@ module Validation
 
     private
 
-    def find_error(value, type, param)
-      case type
-      when :presence then error = 'Пустая строка или nil' if value.nil? || value.empty?
-      when :format then error = "Не соответствует формату #{param}" unless param.match(value.to_s)
-      when :type then error = "Ожидается тип #{param}" unless value.is_a?(param)
-      when :first_last_uniq
-        error = 'Первый и последний эл-ты идентичны' if value[0] == value[-1]
-      when :each_type
-        if value.select { |v| v.is_a?(param) }.length.empty?
-          error = "Содержит тип, отличающийся от #{param}"
-        end
-      end
+    def presence(params)
+      params[:message] ||= 'Пустая строка или nil'
+      params[:message] if params[:value].nil? || params[:value].empty?
+    end
 
-      error
+    def format(params)
+      params[:message] ||= "Не соответствует формату #{params[:param]}"
+      params[:message] unless params[:param].match(params[:value].to_s)
+    end
+
+    def type(params)
+      params[:message] ||= "Ожидается тип #{params[:param]}"
+      params[:message] unless params[:value].is_a?(params[:param])
+    end
+
+    def first_last_uniq(params)
+      params[:message] ||= 'Первый и последний эл-ты идентичны'
+      params[:message] if params[:value].first == params[:value].last
+    end
+
+    def each_type(params)
+      params[:message] ||= "Содержит тип, отличающийся от #{params[:param]}"
+      values = params[:value]
+      params[:message] if values.reject { |v| v.is_a?(params[:param]) }.length.empty?
     end
   end
 
   module ClassMethods
-    def validate(attribute, type, param = nil)
-      validate_attr = '@@validations'
-      validations = class_variable_defined?(validate_attr) ? class_variable_get(validate_attr) : []
+    def validate(*params)
+      validate_attr = '@validations'
+      validations = instance_variable_get(validate_attr) || []
 
       validations << {
-        attribute: attribute,
-        type: type,
-        param: param
+        attribute: params[0],
+        type: params[1],
+        param: params[2] || nil,
+        message: params.last.is_a?(Hash) && params.last.key?(:message) ? params.last[:message] : nil
       }
-      class_variable_set(validate_attr, validations)
+
+      instance_variable_set(validate_attr, validations)
     end
   end
 end

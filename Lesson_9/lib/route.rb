@@ -1,12 +1,11 @@
 require_relative 'validation'
 
 class Route
-
   include Validation
 
   attr_reader :stations
 
-  validate :stations, :first_last_uniq
+  validate :stations, :first_last_uniq, message: 'Первая и последняя станции должны быть разными'
   validate :stations, :each_type, Station
 
   def initialize(first_station, last_station)

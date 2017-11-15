@@ -20,7 +20,7 @@ class Train
 
   attr_reader :speed, :number, :current_station_index, :route, :wagons
 
-  validate :number, :format, /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i
+  validate :number, :format, /^[a-zа-я\d]{3}-?[a-zа-я\d]{2}$/i, message: 'Неверный формат. Попробуйте ввести другой номер.'
 
   def initialize(number)
     @number = number
