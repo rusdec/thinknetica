@@ -61,16 +61,14 @@ module Validation
 
   module ClassMethods
     def validate(*params)
-      validations = @validations || []
+      @validations ||= []
 
-      validations << {
+      @validations << {
         attribute: params[0],
         type: params[1],
         param: params[2] || nil,
         message: params.last.is_a?(Hash) && params.last.key?(:message) ? params.last[:message] : nil
       }
-
-      @validations = validations
     end
   end
 end
