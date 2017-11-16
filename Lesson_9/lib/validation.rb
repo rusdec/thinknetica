@@ -13,8 +13,9 @@ module Validation
 
       errors = []
       validations.each do |validation|
-        validation[:value] = instance_variable_get("@#{validation[:attribute]}")
-        error = send validation[:type], validation
+        #validation[:value] = instance_variable_get("@#{validation[:attribute]}")
+        value = instance_variable_get("@#{validation[:attribute]}")
+        error = send validation[:type], value, validation
 
         errors << error unless error.nil?
       end
@@ -32,37 +33,35 @@ module Validation
 
     private
 
-    def presence(params)
+    def presence(value)
       params[:message] ||= 'Пустая строка или nil'
-      params[:message] if params[:value].nil? || params[:value].empty?
+      params[:message] if value.nil? || value.empty?
     end
 
-    def format(params)
+    def format(value, params)
       params[:message] ||= "Не соответствует формату #{params[:param]}"
-      params[:message] unless params[:param].match(params[:value].to_s)
+      params[:message] unless params[:param].match(value.to_s)
     end
 
-    def type(params)
+    def type(value, params)
       params[:message] ||= "Ожидается тип #{params[:param]}"
-      params[:message] unless params[:value].is_a?(params[:param])
+      params[:message] unless value.is_a?(params[:param])
     end
 
-    def first_last_uniq(params)
+    def first_last_uniq(value)
       params[:message] ||= 'Первый и последний эл-ты идентичны'
-      params[:message] if params[:value].first == params[:value].last
+      params[:message] if value.first == value.last
     end
 
-    def each_type(params)
+    def each_type(value, params)
       params[:message] ||= "Содержит тип, отличающийся от #{params[:param]}"
-      values = params[:value]
-      params[:message] if values.reject { |v| v.is_a?(params[:param]) }.length.empty?
+      params[:message] if value.reject { |v| v.is_a?(params[:param]) }.length.empty?
     end
   end
 
   module ClassMethods
     def validate(*params)
-      validate_attr = '@validations'
-      validations = instance_variable_get(validate_attr) || []
+      validations = @validations || []
 
       validations << {
         attribute: params[0],
@@ -71,7 +70,7 @@ module Validation
         message: params.last.is_a?(Hash) && params.last.key?(:message) ? params.last[:message] : nil
       }
 
-      instance_variable_set(validate_attr, validations)
+      @validations = validations
     end
   end
 end
